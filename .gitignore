@@ -1,0 +1,12 @@
+
+.history
+.DS_Store
+node_modules
+
+# editor
+.vscode
+.idea
+
+# api-extractor
+temp
+dist

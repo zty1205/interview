@@ -106,6 +106,13 @@ An interview book for FE
 - [Vuex](./Vue/vuex.md)
 
 <br/>
+
+## Algorithms
+
+- [查找算法](./Algorithms/find.md)
+- [排序算法](./Algorithms/sort.md)
+
+<br/>
 <br/>
 
 ... 敬请期待

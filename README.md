@@ -112,12 +112,13 @@ An interview book for FE
 - [查找算法](./Algorithms/find.md)
 - [排序算法](./Algorithms/sort.md)
 
+...未完待续
 
 <br/>
 
 ## 七、手写系列
 
-- [实现trim方法](./Handwrite/trim.md)
+- [实现 trim 方法](./Handwrite/trim.md)
 - [拍平数组和对象](./Handwrite/flat.md)
 - [实现字符串翻转](./Handwrite/reverse.md)
 - [数组去重](./Handwrite/unique.md)
@@ -125,16 +126,22 @@ An interview book for FE
 - [判断是否是回文数](./Handwrite/palindrome.md)
 - [实现一个模板引擎](./Handwrite/template.md)
 - [判断一个数是否是素数](./Handwrite/prime.md)
-- [原生ajax](./Handwrite/ajax.md)
+- [原生 ajax](./Handwrite/ajax.md)
 - [判断两个对象相同](./Handwrite/equal.md)
+
+<br/>
+
+## 九、React
+
+- [setData](./React/setData.md)
+- [事件机制](./React/event.md)
+
+...未完待续
 
 <br/>
 <br/>
 
 ... 敬请期待
-
-
-## 九、React
 
 ## 十、Node
 

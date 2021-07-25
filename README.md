@@ -135,6 +135,8 @@ An interview book for FE
 
 - [setData](./React/setData.md)
 - [事件机制](./React/event.md)
+- [redux](./React/redux.md)
+- [实现一个简单的redux](./React/ach_redux.md)
 
 ...未完待续
 

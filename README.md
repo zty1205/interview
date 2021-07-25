@@ -40,6 +40,10 @@ An interview book for FE
 
 - [限制并发请求数](./JavaScript/limit_request.md)
 
+- [基础类型和类型检测](./JavaScript/type.md)
+
+- [js异步发展方案](./JavaScript/sync.md)
+
 <br/>
 <br/>
 

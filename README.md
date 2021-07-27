@@ -42,7 +42,7 @@ An interview book for FE
 
 - [基础类型和类型检测](./JavaScript/type.md)
 
-- [js异步发展方案](./JavaScript/sync.md)
+- [js 异步发展方案](./JavaScript/sync.md)
 
 <br/>
 <br/>
@@ -108,6 +108,8 @@ An interview book for FE
 - [内置组件](./Vue/inner_component.md)
 - [Vue-Router](./Vue/router.md)
 - [Vuex](./Vue/vuex.md)
+- [vue 事件机制](./Vue/event.md)
+- [vue3.0 简单了解](./Vue/vue3.md)
 
 <br/>
 
@@ -140,7 +142,7 @@ An interview book for FE
 - [setData](./React/setData.md)
 - [事件机制](./React/event.md)
 - [redux](./React/redux.md)
-- [实现一个简单的redux](./React/ach_redux.md)
+- [实现一个简单的 redux](./React/ach_redux.md)
 
 ...未完待续
 

@@ -6,8 +6,6 @@ An interview book for FE
 
 # 一、JS
 
-## JavaScript
-
 <br/>
 
 - [作用域和执行环境](./JavaScript/ec_and_sc.md)
@@ -170,6 +168,9 @@ An interview book for FE
 - [CDN](./Network/cdn.md)
 
 ## 十四、设计模式
+
+- [观察者模式 & 发布订阅模式](./DesignPattern/ObAndSub.md)
+- [责任链模式](./DesignPattern/ChainResponsibilityPattern.md)
 
 ## 十五、操作系统
 

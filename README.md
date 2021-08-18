@@ -145,15 +145,20 @@ An interview book for FE
 ...未完待续
 
 <br/>
-<br/>
-
-... 敬请期待
 
 ## 十、Node
 
 ## 十一、typescript
 
+<br/>
+
 ## 十二、小程序
+
+- [微信小程序](./MiniProgram/wx.md)
+- [uniapp 编译](./MiniProgram/uniappCompiler.md)
+- [uniapp 运行](./MiniProgram/uniappRuntimer.md)
+
+<br/>
 
 ## 十三、网络
 

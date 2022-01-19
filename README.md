@@ -92,6 +92,7 @@ An interview book for FE
 - [模块化历程](./Engineering/module.md)
 - [webpack](./Engineering/webpack.md)
 - [babel](./Engineering/babel.md)
+- [常用优化](./Engineering/optimization.md)
 
 <br/>
 

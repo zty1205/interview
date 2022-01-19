@@ -42,6 +42,8 @@ An interview book for FE
 
 - [js 异步发展方案](./JavaScript/sync.md)
 
+- [eventLoop](./JavaScript/eventLoop.md)
+
 <br/>
 <br/>
 

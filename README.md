@@ -821,6 +821,10 @@ a = 1;
 
 <br/>
 
+![var](./assets/img/var.png)
+
+<br/>
+
 ## 2.4 JS 运算符
 
 <br/>

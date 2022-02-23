@@ -92,6 +92,35 @@
     - 2.12.4 async/await
   - 2.13 script 的 jsonp、async 和 defer
   - 2.14 BigInt
+- 三、Css
+  - 3.1 优先级(权重)
+    - 3.1.1 选择器
+  - 3.2 单位
+    - 3.2.1 为什么 padding/margin 的百分比单位基于父元素的宽度而不是高度
+  - 3.3 盒子模型
+  - 3.4 BFC
+    - 3.4.1 特性和应用
+  - 3.5 层叠上下文
+  - 3.6 居中方案
+    - 3.6.1 水平居中
+    - 3.6.2 垂直居中
+    - 3.6.3 水平垂直居中
+  - 3.7 float
+  - 3.8 position
+  - 3.9 transition、animation 和 transform
+    - 3.9.1 transition
+    - 3.9.2 animation 和 keyframes
+    - 3.9.3 transform
+  - 3.10 一像素边框
+  - 3.11 移动端点击 300ms 延迟
+  - 3.12 css 应用
+    - 3.12.1 绘制三角形
+    - 3.12.2 绘制扇形
+  - 3.13 flex
+    - 3.13.1 主轴和交叉轴
+    - 3.13.2 flex: 0 1 auto 的意思
+  - 3.14 移动端适配方案
+  - 3.15 css 模块化
 
 <br/>
 <br/>
@@ -1721,6 +1750,690 @@ Object.prototype.toString.call(a);
 此外，出于兼容性原因，不允许在 BigInt 上使用一元加号（+）运算符。 (这个编译器可以将 C / C++ 代码编译成 JS 代码，但不是普通的 JS，而是一种叫做 asm.js 的 JavaScript 变体。不支持一元加号（+）运算符的原因是某些程序可能依赖于+始终生成 Number 的不变量，或者抛出异常。 更改+的行为也会破坏 asm.js 代码。 asm.js 的类型声明有固定写法，变量 | 0 表示整数，+变量表示浮点数。)
 
 不幸的是，转换 BigInt 是一个极其复杂的过程，这会导致严重的运行时性能损失。直接 polyfill BigInt 也是不可能的，因为该提议改变了几个现有操作符的行为。目前，更好的选择是使用 JSBI 库，它是 BigInt 提案的纯 JS 实现。
+
+<br/>
+<br/>
+
+# 三、Css
+
+<br/>
+
+## 3.1 优先级(权重)
+
+<br/>
+
+权重越高，优先级越高；同一权重内，!import 优先级最高； :not 不参与优先级计算
+
+- !import: 10000
+- 内联样式: 1000
+- id 选择器: 100
+- class 选择器,属性选择器，伪类等:10
+- 标签选择器和伪元素: 1
+
+<br/>
+
+### 3.1.1 选择器
+
+<br/>
+
+- 元素/选择器：如 html
+- 类选择器：如.btn
+- ID 选择器：如#btn
+- 通用选择器：\*
+- 属性选择器：如[attr], [attr=val]
+- 伪类：如:active，:any
+- 伪元素：如::after，::before
+
+伪类与伪元素之差别：书写上：伪元素最大程度可使用双冒号，伪类使用但冒号；运用上：每个选择器最多只能使用一个伪元素，每个选择器可以使用多个伪类；
+
+<br/>
+
+## 3.2 单位
+
+<br/>
+
+- %：
+  - margin,padding 是相对父元素的宽度计算的
+  - top,left,bottom,right 是相对于父元素的高度计算的
+  - translate 是相对自身元素来算的
+- px：像素点
+- em：1em 等于当前元素的 font-size(浏览器默认 16px，可继承，em 可以省略)
+- rem：1rem 等于 html 元素的 font-size
+- vw,vh：视口宽度被均分成 100vw,视口高度被均分成 100vh。视口宽高是页面的可视区域，如键盘弹起安卓的视口宽高发生变化，但 iPhone 不会。（安卓 4.4，iOS6 以上支持）
+- vmax, vmin：
+  - vmax = max(vw,vh)（vmax 安卓 4.4，iOS8 以上支持）
+  - vmin = min(vw,vh)（vmin 安卓 4.4，iOS6 以上支持）
+- ex 和 ch：
+  - ex 以字符"x"的高度为基准；例如 1ex 表示和字符"x"一样长。
+  - ch 以数字"0"的宽度为基准；例如 2ch 表示和 2 个数字"0"一样长。
+
+<br/>
+
+### 3.2.1 为什么 padding/margin 的百分比单位基于父元素的宽度而不是高度
+
+<br/>
+
+W3C 规范中提出：
+
+padding/margin 使用%单位是规定基于父元素的宽度的百分比的内外边距。
+
+一种说法是：当使用类似 margin: 20% 这样的简写的时候，为了不造成歧义，所以干脆就将定义垂直距离的 margin/padding-top/bottom 也都按父元素的宽度计算。
+
+第二种说法是：因为父元素的高度往往由子元素来决定，所以如果 margin/padding-top/bottom 按照父元素高度来决定，容易造成高度计算逻辑混乱
+
+<br/>
+
+## 3.3 盒子模型
+
+<br/>
+
+&emsp;&emsp; 一个盒子模型可分成 margin(外边距), border(边框), padding(内边距), content(内容)， 四部分组成。
+
+盒子模型分为标准盒子模型和 IE 盒子模型。区别是:
+
+- 标准盒子模型中，width 和 height 指的是内容区域的宽度和高度。增加内边距、边框和外边距不会影响内容区域的尺寸，但是会增加元素框的总尺寸。
+- IE 盒子模型中，width 和 height 指的是内容区域+padding+border 的宽度和高度。
+- box-sizing: content-box|border-box|inherit;
+  - content-box: 使用标准盒子模型
+  - border-box: 使用 IE 盒子模型
+
+<br/>
+
+## 3.4 BFC
+
+<br/>
+
+Formatting context(格式化上下文) 是 W3C CSS2.1 规范中的一个概念。它是页面中的一块渲染区域，并且有一套渲染规则，它决定了其子元素将如何定位，以及和其他元素的关系和相互作用。
+
+块级格式化上下文 (Block Fromatting Context)
+
+为了便于理解，我们换一种方式来重新定义 BFC。一个 HTML 元素要创建 BFC，则满足下列的任意一个或多个条件即可：
+
+- 根元素
+- float 的值不是 none。
+- position 的值不是 static 或者 relative。
+- display 的值是 inline-block、table-cell、flex、table-caption 或者 inline-flex
+- overflow 的值不是 visible
+
+BFC 是一个独立的布局环境，其中的元素布局是不受外界的影响，并且在一个 BFC 中，块盒与行盒（行盒由一行中所有的内联元素所组成）都会垂直的沿着其父元素的边框排列。
+
+特性:
+
+- 内部的 Box 会在垂直方向，一个接一个地放置。
+- Box 垂直方向的距离由 margin 决定。属于同一个 BFC 的两个相邻 Box 的 margin 会发生重叠 <font color=#ff502c>（margin 坍塌）</font>
+- 每个元素的 margin box 的左边， 与包含块 border box 的左边相接触(对于从左往右的格式化，否则相反)。即使存在浮动也是如此。
+- BFC 的区域不会与 float box 重叠。
+- 计算 BFC 的高度时，浮动元素也参与计算
+- BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。
+
+<br/>
+
+### 3.4.1 特性和应用
+
+<br/>
+
+1. margin 坍塌
+
+同一个 BFC 下两个容器，第一个容器的下边距和第二个容器的上边距发生了重叠
+
+![bfc1.png](./Css/img/bfc1.png)
+
+解决方法是让两个盒子在两个 bfc
+
+```html
+<div class="box"></div>
+<div class="box"></div>
+
+<div style="overflow: hidden">
+  <div class="box"></div>
+</div>
+<div style="overflow: hidden">
+  <div class="box"></div>
+</div>
+```
+
+2. BFC 可以包含浮动的元素（清除浮动）
+
+![bfc2.png](./Css/img/bfc2.png)
+
+```html
+<div style="border: 1px solid #000;overflow: hidden">
+  <div style="width: 100px;height: 100px;background: #eee;float: left;"></div>
+</div>
+
+<div style="border: 1px solid #000;">
+  <div style="width: 100px;height: 100px;background: #eee;float: left;"></div>
+</div>
+```
+
+3. BFC 可以阻止元素被浮动元素覆盖
+
+![bfc3.png](./Css/img/bfc3.png)
+
+```html
+<div style="height: 100px; width: 100px; float: left; background: lightblue">左浮动的元素</div>
+<div style="width: 200px; height: 200px; background: #eee">
+  没有浮动, 也没有触发 BFC 元素, 1111111111111111111111111111
+</div>
+
+<div class="h" style="height: 20px"></div>
+
+<div style="height: 100px; width: 100px; float: left; background: lightblue">左浮动的元素</div>
+<div style="width: 200px; height: 200px; background: #eee; overflow: hidden">
+  没有浮动, 触发 BFC 元素, 1111111111111111111111111111
+</div>
+```
+
+<br/>
+
+## 3.5 层叠上下文
+
+<br/>
+
+MDN 文档中给出的解释是：我们假定用户正面向（浏览器）视窗或网页，而 HTML 元素沿着其相对于用户的一条虚构的 z 轴排开，层叠上下文就是对这些 HTML 元素的一个三维构想。众 HTML 元素基于其元素属性按照优先级顺序占据这个空间。
+
+表现：
+
+- z-index：auto 不产生层叠上下文
+- z-index：0 和 z-index：auto 是完全不一样的。
+- z-index 高的层级高
+- 父容器 z-index 不为 auto 时，子容器对外表现为父容器的 z-index
+- 每个层叠上下文都完全独立于它的兄弟元素，当处理层叠时只考虑其子元素。每个层叠上下文都是自包含的：当一个元素的内容发生层叠后，该元素将被作为整体在父级层叠上下文中按顺序进行层叠。
+
+如何创建？
+
+- 文档根元素（\<html>）；
+- position 值为 absolute（绝对定位）或 relative（相对定位）且 z-index 值不为 auto 的元素； position 值为 fixed（固定定位）或 sticky（粘滞定位）的元素（沾滞定位适配所有移动设备上的浏览器，但老的桌面浏览器不支持）；
+- flex (flexbox) 容器的子元素，且 z-index 值不为 auto；
+- grid (grid) 容器的子元素，且 z-index 值不为 auto；
+- opacity 属性值小于 1 的元素
+- 应用了特殊 css 的元素 filter 值不是 none， transform 值不是 none 等的元素
+
+<br/>
+
+## 3.6 居中方案
+
+<br/>
+
+### 3.6.1 水平居中
+
+<br/>
+
+- 行内元素: text-align: center;
+- 设置宽度 + margin: xxx auto;
+- flex 的 justify-content: center;
+- grid 的 justify-items: center;
+- 父元素相对定位，子元素绝对定位，left:50%。 如果子元素宽度已知，使用 margin-left: -子元素宽度/2; 宽度未知，则使用 transformX(-50%);
+
+<br/>
+
+### 3.6.2 垂直居中
+
+<br/>
+
+- 行内元素: padding-top = padding-bottom
+- 行内元素: line-height = height
+- 父元素 display:table; 子元素 display:table-cell; vertical-align: middle;
+- flex 的 align-items: center;
+- grid 的 align-items: center;
+- 父元素相对定位，子元素绝对定位，top:50%。 如果子元素高度已知，使用 margin-top: -子元素高度/2; 宽度未知，则使用 transformY(-50%);
+- 父元素相对定位，子元素绝对定位。 子元素 height: xxx; top: 0; bottom: 0; margin: auto xxx;
+
+<br/>
+
+### 3.6.3 水平垂直居中
+
+<br/>
+
+- 已知高宽，使用负边距法
+- 未知，使用 grid, flex 或 transfrom
+
+<br/>
+
+## 3.7 float
+
+<br/>
+
+- 脱离文档流的控制
+- 只有左浮动或右浮动
+- 行内元素浮动后，元素的 display 会赋值为 block，且拥有浮动特性，原留白也会消失。但是不会继承父元素的宽高
+- 页面的表现形式为: 浮动的元素会尽量向左或向右移动，直到它的外边缘碰到包含框或另一个浮动框的边框为止。浮动元素之后的元素将围绕它。浮动元素之前的元素将不会受到影响。
+- 尽量靠上
+- 尽量靠左
+- 尽量一个挨着一个
+- 行内元素绕着浮动元素摆放：左浮动元素的右边和右浮动元素的左边会出浮动元素
+
+如何清除浮动：
+
+```css
+/* 清除浮动 */
+.clear-f::after {
+  display: block;
+  height: 0;
+  content: '';
+  clear: both;
+  visibility: hidden;
+}
+```
+
+<br/>
+
+## 3.8 position
+
+<br/>
+
+- absolute
+  - 脱离文档流，通过 top,bottom,left,right 定位。选取其最近一个最有定位设置的父级对象进行绝对定位，如果对象的父级没有设置定位属性，absolute 元素将以 body 坐标原点进行定位，可以通过 z-index 进行层次分级。
+- fixed
+  - 生成固定定位的元素，相对于浏览器窗口进行定位。元素的位置通过 "left", "top", "right" 以及 "bottom" 属性进行定位。
+- relative
+  - 对象不可层叠、不脱离文档流。生成相对定位的元素，相对于其正常位置进行定位。因此，"left:20" 会向元素的 LEFT 位置添加 20 像素。
+- static
+  - 默认值。没有定位，元素出现在正常的流中（忽略 top, bottom, left, right 或者 z-index 声明）。
+- sticky
+  - 粘性定位，该定位基于用户滚动的位置。它的行为就像 position:relative;而当页面滚动超出目标区域时，它的表现就像 position:fixed;，它会固定在目标位置。**注意**: Internet Explorer, Edge 15 及更早 IE 版本不支持 sticky 定位。 Safari 需要使用 -webkit-
+- inherit
+  - 从父元素继承 position 属性的值
+- initial
+  - 设置该属性为默认值
+
+<br>
+
+<br/>
+
+## 3.9 transition、animation 和 transform
+
+<br/>
+
+### 3.9.1 transition
+
+<br/>
+
+```css
+transition: all 0 ease 0;
+```
+
+- transition-property: 规定设置过渡效果的 CSS 属性的名称
+- transition-duration: 规定完成过渡效果需要多少秒或毫秒
+- transition-timing-function: 规定速度效果的速度曲线
+- transition-delay: 定义过渡效果何时开始
+
+js 函数： ontransitionstart, ontransitionend
+
+<br/>
+
+### 3.9.2 animation 和 keyframes
+
+<br/>
+
+```css
+animation: none 0 ease 0 1 normal;
+```
+
+- animation-name: 规定需要绑定到选择器的 keyframe 名称。。
+- animation-duration: 规定完成动画所花费的时间，以秒或毫秒计。
+- animation-timing-function: 规定动画的速度曲线。
+- animation-delay: 规定在动画开始之前的延迟。
+- animation-iteration-count: 规定动画应该播放的次数。
+- animation-direction: 规定是否应该轮流反向播放动画。
+
+@keyframes animation-name {keyframes-selector {css-styles;}}
+
+- animationname: 必需的,定义 animation 的名称。
+- keyframes-selector: 必需的,动画持续时间的百分比。合法值：0-100% ; from (和 0%相同) ; to (和 100%相同) 注意： 您可以用一个动画 keyframes-selectors。
+- css-styles 必需的。一个或多个合法的 CSS 样式属性
+
+<br/>
+
+### 3.9.3 transform
+
+<br/>
+
+transform 属性向元素应用 2D 或 3D 转换。该属性允许我们对元素进行旋转、缩放、移动或倾斜。
+
+- matrix 矩阵变换
+- translate 位移
+- scale 缩放
+- rotate 旋转
+- skew 倾斜
+- perspective 透视
+
+<br/>
+
+## 3.10 一像素边框
+
+<br/>
+
+- 媒体查询，写具体数值
+
+```css
+.border {
+  border: 1px solid #999;
+}
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  .border {
+    border: 0.5px solid #999;
+  }
+}
+```
+
+- 设置 border-image 方案
+
+```css
+.border-image-1px {
+  border-width: 1px 0px;
+  -webkit-border-image: url('border.png') 2 0 stretch;
+  border-image: url('border.png') 2 0 stretch;
+}
+```
+
+- box-shadow 方案, box-shadow: h-shadow v-shadow [blur] [spread] [color] [inset]; 分别是水平阴影位置，垂直阴影位置，模糊距离， 阴影尺寸，阴影颜色，将外部阴影改为内部阴影
+
+```css
+box-shadow: 0 1px 1px -1px rgba(0, 0, 0, 0.5);
+```
+
+- 伪元素 + transform + 媒体查询
+
+```css
+<!-- ratio 2 -- > border-1px {
+  position: relative;
+}
+.border-1px::after {
+  display: block;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform-origin: center top;
+  -webkit-transform-origin: center top;
+  border-top: 1px solid #e6e6e6;
+  width: 100%;
+  height: 200%;
+  transform: scaleY(0.5);
+  -webkit-transform: scaleY(0.5);
+}
+```
+
+<br/>
+
+## 3.11 移动端点击 300ms 延迟
+
+<br/>
+
+300 毫秒延迟的主要原因是解决双击缩放(double tap to zoom)。
+
+双击事件的顺序：touchstart -> mouseover -> mousemove -> mousedown -> mouseup -> click -> touchend
+
+解决方案
+
+- meta 禁用缩放或固定视口宽度
+
+```html
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+```
+
+- fastclick
+  - FastClick 的实现原理是在检测到 touchend 事件的时候，会通过 DOM 自定义事件立即出发模拟一个 click 事件，并把浏览器在 300ms 之后的 click 事件阻止掉。
+  - 脚本相对较大
+  - fastclick 在 ios 上可能会影响元素自动触发，比如 直接 click()；会拦截第一次，需要执行两次 click()；才会触发；安卓上不需要；
+- tap 事件
+  - 在 touchstart 时会记录一个值 x1，y1，在 touchend 时会记录 x2，y2，通过对比这几个值，判断用户是否是点击事件，而不是滑动事件，然后直接触发事件
+  - tap 事件存在"点透"的情况
+
+<br/>
+
+## 3.12 css 应用
+
+<br/>
+
+### 3.12.1 绘制三角形
+
+<br/>
+
+1. border 法：原理是基于盒模型，将一边的 border 宽度设为 0，其他两边 border 的颜色设为透明.
+
+![三角.jpg](./Css/img/border.png)
+
+```css
+<!-- 向上 -- > .triangle-1 {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 100px solid red;
+}
+```
+
+2. svg：三点绘制一个三角形
+
+```html
+<svg height="250" width="250">
+  <polygon points="100,10 150,180 50,180" style="fill:lime;stroke:purple;stroke-width:1" />
+</svg>
+```
+
+<br/>
+
+### 3.12.2 绘制扇形
+
+<br/>
+
+1. 圆切割法：圆任意不重合的半径和圆弧组成的就是一个扇形。绘制一个圆形的父元素，通过 overflow 切割矩形或三角形的子元素。如图所示：
+
+![image](./Css/img/c1.png)
+
+```html
+<!-- html -->
+<div class="circle">
+  <div class="rect"></div>
+</div>
+```
+
+```css
+<!-- css -- > .circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  background: red;
+  border-radius: 80px;
+  overflow: hidden;
+}
+.rect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background-color: yellow;
+  display: block;
+  transform: skew(30deg);
+  transform-origin: left top;
+}
+```
+
+2. 两半圆法: 一个圆的两个半圆经中心旋转缓缓打开的部分也是一个扇形。如图所示：
+
+![image](./Css/img/c2.png)
+
+```html
+<!-- html 绘制一个60度扇形 -->
+<div class="circle">
+  <div class="cir cir1"></div>
+  <div class="cir cir2"></div>
+</div>
+```
+
+```css
+.circle {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: yellow;
+}
+.cir {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  transform: rotate(30deg);
+  clip: rect(0px, 100px, 200px, 0px);
+  border-radius: 100px;
+  background-color: red;
+}
+.cir2 {
+  transform: rotate(-90deg);
+}
+```
+
+3. svg：使用 path 绘制扇形，绘制两边和圆弧
+
+![image](./Css/img/c3.png)
+
+```html
+<svg height="160" width="160">
+  <path fill="red" d="M 20 20 H 120 A 100 100 0 0 1 70 106.602 Z" />
+</svg>
+```
+
+<br/>
+
+## 3.13 flex
+
+<br/>
+
+### 3.13.1 主轴和交叉轴
+
+<br/>
+
+![flex轴](./Css/img/flex.png)
+
+容器默认存在两根轴：水平的主轴（main axis）和垂直的交叉轴（cross axis）。主轴的开始位置（与边框的交叉点）叫做 main start，结束位置叫做 main end；交叉轴的开始位置叫做 cross start，结束位置叫做 cross end。
+
+项目默认沿主轴排列。单个项目占据的主轴空间叫做 main size，占据的交叉轴空间叫做 cross size。
+
+<br/>
+
+### 3.13.2 flex: 0 1 auto 的意思
+
+<br/>
+
+```css
+flex: flex-grow flex-shrink flex-basis; /*的简写，默认值为0 1 auto。后两个属性可选。*/
+```
+
+- flex-grow：属性定义项目的放大比例，默认为 0，即如果存在剩余空间，也不放大。如果所有项目的 flex-grow 属性都为 1，则它们将等分剩余空间（如果有的话）。如果一个项目的 flex-grow 属性为 2，其他项目都为 1，则前者占据的剩余空间将比其他项多一倍。
+
+- flex-shrink：属性定义了项目的缩小比例，默认为 1，即如果空间不足，该项目将缩小。 如果所有项目的 flex-shrink 属性都为 1，当空间不足时，都将等比例缩小。如果一个项目的 flex-shrink 属性为 0，其他项目都为 1，则空间不足时，前者不缩小。
+
+- flex-basis 属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为 auto，即项目的本来大小。
+
+参考：
+
+- 属性介绍：https://blog.csdn.net/domunweb/article/details/95064383
+- 总体介绍：http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html
+
+<br/>
+
+## 3.14 移动端适配方案
+
+<br/>
+
+- css 的 1px 代理逻辑像素
+- 屏幕上的 2px 表示物理像素
+- 像素比 = 物理像素/逻辑像素（iphone6-2 倍屏）
+
+meta: viewport
+
+- width：控制 viewport 的大小，可以指定的一个值，如果 600，或者特殊的值，如 device-width 为设备的宽度（单位为缩放为 100% 时的 CSS 的像素）。
+- height：和 width 相对应，指定高度。
+- initial-scale：初始缩放比例，也即是当页面第一次 load 的时候缩放比例。
+- maximum-scale：允许用户缩放到的最大比例。
+- minimum-scale：允许用户缩放到的最小比例。
+- user-scalable：用户是否可以手动缩放
+
+- layout viewport 布局视口， 网页在移动端浏览器上的默认 viewport，通常为 980ox，可以通过 document.documentElement.clientWidth 来获取。
+- visual viewport 视觉视口，顾名思义指浏览器可视区域，即我们在移动端设备上看到的区域。网页的实际绘制区域视口大小 layout viewport 比我们在手机上可以看到的大小要大，所以我们手机端视觉视口会出现横向滚动条。visual viewport 的宽度可以通过 window.innerWidth 来获取。
+- ideal viewport 理想视口，即页面绘制区域可以完美适配设备宽度的视口大小，不需要出现滚动条即可正常查看网站的所有内容，且文字图片清晰。
+
+该 meta 标签的作用是让当前 viewport 的宽度等于设备的宽度。width 和 initial-scale=1 同时出现，并且还出现了冲突时，取最大值，但要注意的是，在 iphone 和 ipad 上，无论是竖屏还是横屏，宽度都是竖屏时 ideal viewport 的宽度。
+
+(innerWidth 是网页的宽度，screen.width 是屏幕的宽度，如果无右侧的开发者工具，那么两者宽度一样)
+
+- 静态布局：通过 js 动态修改标签的 initial-scale 使得页面等比缩放，刚好占满整个屏幕。如 375 的屏幕 meta name="viewport" content="width=750, initial-scale=0.5, maximum-scale=0.5, minimum-scale=0.5">
+  - 采用 px 为单位，这种方案实现简单，不存在兼容性问题
+  - 但用户体验很不友好。
+
+```javascript
+const WIDTH = 750;
+const mobileAdapter = () => {
+  let scale = screen.width / WIDTH;
+  let content = `width=${WIDTH}, initial-scale=${scale}, maximum-scale=${scale}, minimum-scale=${scale}`;
+  let meta = document.querySelector('meta[name=viewport]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute('name', 'viewport');
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', content);
+};
+```
+
+- 百分比方案：使用 百分比% 定义 宽度，高度 用 px 固定，根据可视区域实时尺寸进行调整，尽可能适应各种分辨率，通常使用 max-width/min-width 控制尺寸范围过大或者过小。
+  - 原理简单，不存在兼容性问题
+  - 如果屏幕尺度跨度太大，相对设计稿过大或者过小的屏幕不能正常显示，在大屏手机或横竖屏切换场景下可能会导致页面元素被拉伸变形，字体大小无法随屏幕大小发生变化;设置盒模型的不同属性时，其百分比设置的参考元素不唯一，容易使布局问题变得复杂
+- rem 方案：相对于根元素 font-size 计算值的倍数。根据 屏幕宽度 设置 html 标签的 font-size，在布局时使用 rem 单位布局，达到自适应的目的，是 弹性布局 的一种实现方式。
+  - 兼容性好，相较于之前的静态布局和百分比方案，页面不会因为伸缩发生变形，自适应效果更佳。
+  - 不是纯 css 移动适配方案，需要引入 js 脚本；小数像素问题
+
+```javascript
+export function setRem(pageSize) {
+  let wWidth = window.innerWidth || document.body.clientWidth || document.documentElement.clientWidth;
+  document.getElementsByTagName('html')[0].style.fontSize = (wWidth / pageSize) * 100 + 'px';
+}
+```
+
+- vh/vw 方案：将布局视口划分成 100 份
+  - 纯 css 移动端适配方案，不存在脚本依赖问题。相对于 rem 以根元素字体大小的倍数 定义 元素大小，逻辑清晰简单，
+  - 存在一些兼容性问题
+- 媒体查询方案： @media
+  - 能够使网页在不同设备、不同分辨率屏幕上呈现合理布局，不仅仅是样式伸缩变换
+  - 要匹配足够多的设备与屏幕，一个 web 页面需要多个设计方案，工作量比较大;通过媒体查询技术需要设置一定量的断点，到达某个断点前后的页面发生显著变化，用户体验不太友好
+
+<br/>
+
+## 3.15 css 模块化
+
+<br/>
+
+- css modules
+
+和 css 一样书写，只不过变成了模块化引入；提供 css 作用域，避免冲突，如 Hash 值难以和外部样式进行复用(在你的 css 名后面加 hash 值)。js 中需要 import 进来使用
+
+```jsx
+import * as styles from '../index.module.less';
+
+<div className={styles.colTime}></div>;
+```
+
+- css in js
+
+完全在 js 中写 css 提供 css 作用域，避免冲突，能够使用 js 变量，比较高效违背了 js css 分离的原则，不能使用预处理器.
+
+例如 style-components
+
+```jsx
+import styled from 'styled-components'
+import AreaChart from '@/components/AreaChart'
+const WrapSpan = styled.span`
+  font-weight: 500;
+  margin-left: 4px;
+  /* color: ${({ theme }) => theme.colors.blue}; */
+`
+
+<WrapSpan></WrapSpan>
+```
 
 <br/>
 <br/>

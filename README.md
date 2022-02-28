@@ -121,6 +121,52 @@
     - 3.13.2 flex: 0 1 auto 的意思
   - 3.14 移动端适配方案
   - 3.15 css 模块化
+- 四、Html 和浏览器
+  - 4.1 块级，行内元素
+  - 4.2 DOM
+  - 4.3 事件捕获流，冒泡流和事件委托
+    - 4.3.1 DOM 级别事件
+  - 4.4 src 和 href 的区别
+  - 4.5 跨 tab 通信
+    - 4.5.1 同源页面下
+    - 4.5.2 非同源
+  - 4.6 hash 和 history 模式
+    - 4.6.1 hash
+    - 4.6.2 history
+  - 4.7 在浏览器上输入 url 之后的流程
+    - 4.7.1 回流和重绘
+    - 4.7.2 合成
+  - 4.8 跨域和跨站
+    - 4.8.1 同源策略
+    - 4.8.2 跨域处理方案
+    - 4.8.3 跨域未携带 cookie 可能的原因
+    - 4.8.4 跨站
+  - 4.9 事件循环
+    - 4.9.1 宏任务和微任务
+    - 4.9.2 基本流程
+    - 4.9.3 node 事件循环
+    - 4.9.4 经典例子
+  - 4.10 GC 垃圾回收机制
+    - 4.10.1 标记清除
+    - 4.10.2 引用计数
+    - 4.10.3 V8-栈内存的回收
+    - 4.10.4 V8-堆内存的回收
+    - 4.10.5 内存泄漏
+  - 4.11 缓存机制
+  - 4.12 安全
+    - 4.12.1 XSS 攻击全称跨站脚本攻击
+    - 4.12.2 CSRF 跨站点请求伪造
+  - 4.13 Cookie, Session, Token, SessionStorage、LocalStorage
+    - 4.13.1 Cookie, Session
+    - 4.13.2 Cookie, SessionStorage, LocalStorage
+    - 4.13.3 Token
+    - 4.13.4 限制 Cookies 访问
+  - 4.14 Preload 和 Prefetch
+    - 4.14.1 Preload
+    - 4.14.2 Prefetch
+    - 4.14.3 对比
+  - 4.15 未归类
+    - 4.15.1 options 预计请求
 
 <br/>
 <br/>
@@ -2434,6 +2480,757 @@ const WrapSpan = styled.span`
 
 <WrapSpan></WrapSpan>
 ```
+
+<br/>
+<br/>
+
+# 四、Html 和浏览器
+
+<br/>
+
+## 4.1 块级，行内元素
+
+<br/>
+
+常见的
+
+行内元素有： a, span, label, strong, em, br, img, input, select, textarea, cite,
+
+块级元素： div, h1~h6, p, form, ul, li, ol, dl, address, hr, menu, table, fieldset
+
+可变元素，根据上下文语境决定该元素为块元素或者行内元素： button，iframe，object，iframe 等
+
+在标准文档流里面，块级元素具有以下特点：
+
+- 总是在新行上开始，占据一整行；
+- 高度，行高以及外边距和内边距都可控制；
+- 宽带始终是与浏览器宽度一样，与内容无关；
+- 它可以容纳内联元素和其他块元素。
+
+行内元素的特点：
+
+- 和其他元素都在一行上；
+- 高，行高及外边距和内边距部分可改变；
+- 宽度只与内容有关；
+- 行内元素只能容纳文本或者其他行内元素。不可以设置宽高，其宽度随着内容增加，高度随字体大小而改变，内联元素可以设置外边界，但是外边界不对上下起作用，只能对左右起作用，也可以设置内边界，但是内边界在 ie6 中不对上下起作用，只能对左右起作用
+
+<br/>
+
+## 4.2 DOM
+
+<br/>
+
+从网络传给渲染引擎的 HTML 文件字节流是无法直接被渲染引擎理解的，所以要将其转化为渲染引擎能够理解的内部结构，这个结构就是 DOM。DOM 提供了对 HTML 文档结构化的表述。在渲染引擎中，DOM 有三个层面的作用
+
+- 从页面的视角来看，DOM 是生成页面的基础数据结构。
+- 从 JavaScript 脚本视角来看，DOM 提供给 JavaScript 脚本操作的接口，通过这套接口，JavaScript 可以对 DOM 结构进行访问，从而改变文档的结构、样式和内容。
+- 从安全视角来看，DOM 是一道安全防护线，一些不安全的内容在 DOM 解析阶段就被拒之门外了。
+
+简言之，DOM 是表述 HTML 的内部数据结构，它会将 Web 页面和 JavaScript 脚本连接起来，并过滤一些不安全的内容。
+
+<br/>
+
+## 4.3 事件捕获流，冒泡流和事件委托
+
+<br/>
+
+- 事件流描述的是从页面中接收事件的顺序。
+- 类型
+  - 事件冒泡流：事件的传播是从最特定的事件目标到最不特定的事件目标。即从 DOM 树的叶子到根。（IE）
+  - 事件捕获流：事件的传播是从最不特定的事件目标到最特定的事件目标。即从 DOM 树的根到叶子。（网景公司）
+- DOM 标准规定事件流包括三个阶段：事件捕获阶段、处于目标阶段和事件冒泡阶段。
+  - 事件捕获阶段：实际目标（<text>）在捕获阶段不会接收事件。也就是在捕获阶段，事件从(window ->)document 到<html>再到<body>就停止了。
+  - 处于目标阶段：事件在<text>上发生并处理。但是事件处理会被看成是冒泡阶段的一部分。
+  - 冒泡阶段：事件又传播回文档。
+- 事件委托又叫事件代理，是根据事件冒泡流，让父元素代理响应函数减少 DOM 的访问
+  - target：触发事件的 DOM
+  - currentTarget：绑定事件的 DOM
+
+**_注意以下事件不支持冒泡_**：
+
+- blur
+- focus
+- load
+- unload
+- 以及自定义的事件。
+
+原因是在于：这些事件仅发生于自身上，而它的任何父节点上的事件都不会产生，所有不会冒泡
+
+如何阻止事件捕获或冒泡
+
+- 阻止冒泡
+
+```javascript
+e.stopPropagation() || return false。
+
+window.e.cancelBubble=true; // IE
+```
+
+- 阻止捕获
+
+```javascript
+e.stopImmediatePropagation(); // 阻止捕获和其他事件
+```
+
+- 阻止默认事件: 事件处理过程中，不阻击事件冒泡，但阻击默认行为
+
+```javascript
+e.preventDefault()
+
+window.e.returnValue=false; || return false;// IE
+```
+
+<br/>
+
+### 4.3.1 DOM 级别事件
+
+<br/>
+
+```javascript
+// DOM-1 on-xx 只能绑定一个
+window.onload = function () {};
+// DOM-2 可以绑定多个
+window.addEventListener(
+  'load',
+  (e) => {},
+  true ||
+    false || {
+      capture: '是否在捕获阶段触发',
+      once: '是否只执行一次',
+      passive: '函数不会调用 preventDefault()'
+    }
+);
+// dom-3新增了许多其他事件
+```
+
+<br/>
+
+## 4.4 src 和 href 的区别
+
+<br/>
+
+- href：Hypertext Reference 的缩写，超文本引用，它指向一些网络资源，建立和当前元素或者说是本文档的链接关系。
+
+```html
+<a href="https://www.aaa.com"></a>
+
+<link type="text/css" rel="stylesheet" href="aaa.css" />
+```
+
+- src：source 的所写，表示的是对资源的引用，它指向的内容会嵌入到当前标签所在的位置。
+
+```html
+<img src="aaa.jpg">
+
+<iframe src="aaa.html">
+
+<script src="aaa.js">
+```
+
+**_区别_**
+
+- src 用于替代这个元素，而 href 用于建立这个标签与外部资源之间的关系。
+- 浏览器需要加载完毕 src 的内容才会继续往下走。而遇到 href，页面会并行加载后续内容。
+
+<br/>
+
+## 4.5 跨 tab 通信
+
+<br/>
+
+### 4.5.1 同源页面下
+
+<br/>
+
+- BroadCast Channel
+
+```javascript
+const bc = new BroadcastChannel('BC');
+bc.onmessage = function (e) {};
+bc.postMessage(mydata);
+```
+
+- Service Worker 是一个可以长期运行在后台的 Worker，能够实现与页面的双向通信。 message 和 postmessage
+
+- LocalStorage, 同源的其他页面可以监听到
+
+```
+window.addEventListener('storage', function (e) {})
+```
+
+- Shared Worker 是 Worker 家族的另一个成员。普通的 Worker 之间是独立运行、数据互不相通；而多个 Tab 注册的 Shared Worker 则可以实现数据共享。
+
+- IndexedDB 也一样，但和 Shared Worker 一样需要轮询获取数据
+
+<br/>
+
+### 4.5.2 非同源
+
+<br/>
+
+iframe 不受同源的影响，做中间页面
+
+<br/>
+
+## 4.6 hash 和 history 模式
+
+<br/>
+
+### 4.6.1 hash
+
+<br/>
+
+- 使用 window.location.hash 属性及窗口的 onhashchange 事件，可以实现监听浏览器地址 hash 值变化，执行相应的 js 切换网页。下面具体介绍几个使用过程中必须理解的要点：
+
+- hash 指的是地址中#号以及后面的字符，也称为散列值。hash 也称作锚点，本身是用来做页面跳转定位的。如 http://localhost/index.html#abc，这里的#abc 就是 hash；散列值是不会随请求发送到服务器端的，所以改变 hash，不会重新加载页面；
+- 监听 window 的 hashchange 事件，当散列值改变时，可以通过 location.hash 来获取和设置 hash 值；
+- location.hash 值的变化会直接反应到浏览器地址栏；
+
+<br/>
+
+### 4.6.2 history
+
+<br/>
+
+- window.history 属性指向 History 对象，它表示当前窗口的浏览历史。当发生改变时，只会改变页面的路径，不会刷新页面。
+- History 对象保存了当前窗口访问过的所有页面网址。通过 history.length 可以得出当前窗口一共访问过几个网址。
+- 由于安全原因，浏览器不允许脚本读取这些地址，但是允许在地址之间导航。
+- 浏览器工具栏的“前进”和“后退”按钮，其实就是对 History 对象进行操作。
+
+```javascript
+History.pushState()
+History.replaceState()
+window.addEventListener('popstate', function(e) {}
+```
+
+- 仅仅调用 pushState()方法或 replaceState()方法 ，并不会触发该事件;
+- 只有用户点击浏览器倒退按钮和前进按钮，或者使用 JavaScript 调用 History.back()、History.forward()、History.go()方法时才会触发。 -m 另外，该事件只针对同一个文档，如果浏览历史的切换，导致加载不同的文档，该事件也不会触发。
+- 页面第一次加载的时候，浏览器不会触发 popstate 事件。
+
+<br/>
+
+## 4.7 在浏览器上输入 url 之后的流程
+
+<br/>
+
+1. 查找 url 对应服务器的 IP, 如果没有在缓存中找到，则通过 DNS 服务器进行解析
+2. 发起 TCP 的 3 次握手
+3. 建立 TCP 连接后发起 http 请求
+4. 服务器响应 http 请求，返回相应的 html 给浏览器
+5. 浏览器逐行解析 html，加载外部文件
+6. 生成 css 树和 dom 树（互不影响），但 script 标签的加载阻塞 dom 树的构建
+7. attachment，将 css 树和 dom 树结合，进行 layout 构建出渲染树。css 文件则会阻塞渲染树的构建
+8. paint 渲染，呈现页面
+9. composite：浏览器会将各层的信息发送给 GPU，GPU 会将各层合成（composite），显示在屏幕上。（类似 ps 的图层）
+
+<br/>
+
+### 4.7.1 回流和重绘
+
+<br/>
+
+- reflow（回流）：当浏览器发现某个部分发生了点变化影响了布局，需要倒回去重新渲染，这个回退的过程叫 reflow。reflow 会从 <html> 这个 root/frame 开始递归往下，依次计算所有的结点几何尺寸和位置
+
+- repaint（重绘）：改变某个元素的背景色、文字颜色、边框颜色等等不影响它周围或内部布局的属性时，屏幕的一部分要重画，但是元素的几何尺寸没有变。
+
+<br/>
+
+### 4.7.2 合成
+
+<br/>
+
+Composite（渲染层合并）：对页面中 DOM 元素的绘制是在多个层上进行的。在每个层上完成绘制过程之后，浏览器会将所有层按照合理的顺序合并成一个图层，然后显示在屏幕上。
+
+如何变成合成层？
+
+- 3D 或透视变换(perspective transform) CSS 属性
+- 使用加速视频解码的 video 元素 拥有 3D
+- (WebGL) 上下文或加速的 2D 上下文的 canvas 元素
+- 混合插件(如 Flash)
+- 对自己的 opacity 做 CSS 动画或使用一个动画变换的元素
+- 拥有加速 CSS 过滤器的元素
+- 元素有一个包含复合层的后代节点(换句话说，就是一个元素拥有一个子元素，该子元素在自己的层里)
+- 元素有一个 z-index 较低且包含一个复合层的兄弟元素(换句话说就是该元素在复合层上面渲染)
+
+合成层就会有自己的绘图上下文，并且会开启硬件加速，有利于性能提升：
+
+- 合成层的位图，会交由 GPU 合成，比 CPU 处理要快
+- 当需要 repaint 时，只需要 repaint 本身，不会影响到其他的层
+- 对于 transform 和 opacity 效果，不会触发 layout 和 paint
+
+劣处：
+
+- 合成层会占用系统内存与 GPU(在移动设备上尤其有限)的内存，并且拥有大量的合成层会因为记录哪些是可见的而引入额外的开销。
+- 层爆炸，由于某些原因可能导致产生大量不在预期内的合成层。简单直接的方式：使用 3D 硬件加速提升动画性能时，最好给元素增加一个 z-index 属性，人为干扰合成的排序，可以有效减少 chrome 创建不必要的合成层，提升渲染性能，移动端优化效果尤为明显。
+
+<br/>
+
+## 4.8 跨域和跨站
+
+<br/>
+
+### 4.8.1 同源策略
+
+<br/>
+
+&emsp;&emsp; 同源策略是浏览器最核心也最基本的安全功能，如果缺少了同源策略，浏览器很容易受到 XSS、CSFR 等攻击。所谓同源是指"协议+域名+端口"三者相同，即便两个不同的域名指向同一个 ip 地址，也非同源。
+
+同源策略限制以下几种行为：
+
+- Cookie、LocalStorage 和 IndexDB 无法读取
+- DOM 和 Js 对象无法获得
+- AJAX 请求不能发送
+
+<br/>
+
+### 4.8.2 跨域处理方案
+
+<br/>
+
+- Jsonp：网页通过动态添加一个 script 元素，向服务器请求数据; 服务器收到请求后，将数据放在一个指定名字的回调函数里传回来。但只支持 get 请求。
+- 设置 document.domain: 此方案仅限主域相同，子域不同的跨域应用场景
+- 通过更改中间页面的 hash 值或是 window.name 属性。
+- PostMessage 跨域 API
+- 设置跨域资源共享（CORS），需要浏览器和服务器同时支持。
+  - Access-Control-Allow-Origin
+  - Access-Control-Allow-Methods
+  - Access-Control-Allow-Headers
+  - Access-Control-Allow-Credentials
+  - Access-Control-Max-Age
+- Nginx 反向代理
+- Node 中间件代理
+- Websock：因为有了 Origin（请求源）这个字段，所以 WebSocket 才没有实行同源政策。因为服务器可以根据这个字段，判断是否许可本次通信。
+
+<br/>
+
+### 4.8.3 跨域未携带 cookie 可能的原因
+
+<br/>
+
+- 未设置 withCredentials：axios, $.ajax, xhr 未设置 withCredentials 的请求头
+- CORS 的 Access-Control-Allow-Credentials 未设置成 true
+
+<br/>
+
+### 4.8.4 跨站
+
+<br/>
+
+Cookie 中的「同站」判断就比较宽松：只要两个 URL 的 eTLD+1 相同即可，不需要考虑协议和端口。其中，eTLD 表示有效顶级域名，注册于 Mozilla 维护的公共后缀列表（Public Suffix List）中，例如，.com、.http://co.uk、.http://github.io 等。eTLD+1 则表示，有效顶级域名+二级域名，例如 taobao.com 等。
+
+举几个例子，www.taobao.com 和 www.baidu.com 是跨站，www.a.taobao.com 和 www.b.taobao.com 是同站，a.github.io 和 b.github.io 是跨站(注意是跨站)。
+
+schemeful/协议 同站则还需要判断协议是否相同
+
+<br/>
+
+## 4.9 事件循环
+
+<br/>
+
+### 4.9.1 宏任务和微任务
+
+<br/>
+
+首先来了解下宏任务和微任务，异步任务分为 task（宏任务，也可称为 macroTask）和 microtask（微任务，也叫 jobs）两类。
+
+Task:
+
+- setTimeout
+- setInterval
+- setImmediate (Node 独有)
+- requestAnimationFrame (浏览器独有)
+- I/O
+- UI rendering (浏览器独有)
+- script 标签
+
+MicroTask:
+
+- process.nextTick (Node 独有)
+- Promise
+- MutationObserver
+
+当满足执行条件时，task 和 microtask 会被放入各自的队列中，等待放入执行线程执行，我们把这两个队列称为 Task Queue(也叫 Macrotask Queue)和 Microtask Queue。
+
+<br/>
+
+### 4.9.2 基本流程
+
+<br/>
+
+1. 从任务队列 task queue 选择中最先进入的任务执行，如果队列为空，则执行 microtask queue。
+2. 检查该 task 是否注册了 microtask queue，如果有，则按注册顺序依次执行 microtask。如果没有则继续下一步。
+3. 一些其他操作，例如界面渲染。
+4. 重复以上步骤。
+
+<br/>
+
+### 4.9.3 node 事件循环
+
+<br/>
+
+1. timers：执行满足条件的 setTimeout、setInterval 回调。 [uv__run_timers 函数]
+2. I/O callbacks：是否有已完成的 I/O 操作的回调函数，来自上一轮的 poll 残留。[uv__run_pending 函数]
+3. idle，prepare：node 内部特定的阶段，在 I/O 轮询开始前做一些特定的回调，可忽略 [uv__run_idle, uv__run_prepare 函数]
+4. poll：轮询，等待还没完成的 I/O 事件，会因 timers 和超时时间等结束等待。[uv__io_poll(loop, timeout)函数]
+5. check：执行 setImmediate 的回调。[uv__run_check 函数]
+6. close callbacks：关闭所有的 closing handles，一些 onclose 事件，例如 socket.on("close",func)。[ uv__run_closing_handles(loop)函数]
+7. 重复以上步骤。
+
+<br/>
+
+### 4.9.4 经典例子
+
+<br/>
+
+```javascript
+setTimeout(() => {
+  console.log('timer1');
+  Promise.resolve().then(function () {
+    console.log('promise1');
+  });
+}, 0);
+setTimeout(() => {
+  console.log('timer2');
+  Promise.resolve().then(function () {
+    console.log('promise2');
+  });
+}, 0);
+```
+
+结果如下：
+
+- 浏览器环境：time1，promise1，time2，promise2
+- node11 以下：time1，time2，promise1，promise2
+- node11 及以上：time1，promise1，time2，promise2
+
+在 node 11 版本中，node 下 Event Loop 已经与浏览器趋于相同。我们可以用浏览器的微任务和宏任务解释，11 版本前的 timer，由于到期时间相近，会在 timer 阶段合并执行。所以打出 time1 后，打印 time2。
+
+<br/>
+
+## 4.10 GC 垃圾回收机制
+
+<br/>
+
+&emsp;&emsp; 垃圾回收机制(GC:Garbage Collection),执行环境负责管理代码执行过程中使用的内存。浏览器会在浏览器渲染的空闲时间内清除内存。
+
+&emsp;&emsp; 现在各大浏览器通常用采用的垃圾回收有两种方法：标记清除、引用计数。
+
+<br/>
+
+### 4.10.1 标记清除
+
+<br/>
+
+现代浏览器大多数采用这种方式：当变量进入环境时，将变量标记"进入环境"，当变量离开环境时，标记为：“离开环境”。某一个时刻，垃圾回收器会过滤掉环境中的变量，以及被环境变量引用的变量，剩下的就是被视为准备回收的变量。
+
+<br/>
+
+### 4.10.2 引用计数
+
+<br/>
+
+引用计数的含义是跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型赋值给该变量时，则这个值的引用次数就是 1。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数就减 1。当这个引用次数变成 0 时，则说明没有办法再访问这个值了，因而就可以将其所占的内存空间给收回来。
+
+因为存在循环引用的情况会导致内存无法释放，需要手动值为 null，因此大多数的浏览器已经放弃这种回收方式。
+
+在 V8 中，主要将内存分为新生代和老生代，新生代的对象为存活时间较短的对象，老生代中的对象为存活时间较长或常驻内存的对象。
+
+<br/>
+
+### 4.10.3 V8-栈内存的回收
+
+<br/>
+
+栈内存在调用栈上下文切换后就会被回收。
+
+<br/>
+
+### 4.10.4 V8-堆内存的回收
+
+<br/>
+
+- **新生代**内存回收机制：新生代内存容量小，默认下，64 位系统下仅有 32M。
+
+使用<font color=#ff502c>cheney 算法</font>将新生代内存分为 From、To 两部分，处于使用状态的称为 From 空间，处于闲置状态的称为 To 空间。进行垃圾回收时，将 From 中的存活对象复制到 To，然后将非存活对象回收，之后调换 From/To。
+
+- **晋升**：如果新生代的变量经过复制依然依然存活时，那么就会被放入老生代内存中。晋升有两个条件：
+
+  - 是否经历过新生代的回收
+  - To 空间内存占比超过限制
+
+- **老生代**内存回收机制
+
+V8 在老生代中主要采用 Mark-Sweep 和 Mark-Compact 相结合的方式进行垃圾回收。主要使用 Mark-Sweep，在空间不足以对新生代中晋升过来的对象进行分配是才使用 Mark-Compact。
+
+- <font color=#ff502c>Mark-Sweep</font>： 在标记阶段遍历所有堆中的所有对象，并标记活着的对象，在清除阶段清除没有标记的对象。
+- <font color=#ff502c>Mark-Compact</font>： 在 Mark-Sweep 的基础上演变而来，差别在于在标记死亡后，在整理过程中会将或者的对象往一端移动，移动后，直接清理掉边界外的内存，解决 Mark-Sweep 的内存碎片问题。
+
+一般浏览器要求最高 60fps，算下来每帧 16.6ms。Chrome 为了缩短 GC 时间，它尝试将工作分摊到每个空闲时间。它将检查每个帧时间（16.6 ms）的剩余时间，并尝试为 GC 做一些工作。原文
+
+- 如果垃圾收集事件可能很快发生，V8 GC 将检查每 n 个分配或 m 个时间单位。V8 GC 在任务调度程序中为事件注册空闲任务。
+- 任务调度程序将调度空闲任务并使用可用空闲时间调用给定的回调。V8 GC 将检查任务是否仍处于待处理状态，以及是否有足够的空闲时间来处理任务。
+- 因此，为了减少垃圾回收带来的停顿时间，V8 引擎又引入了 Incremental Marking(增量标记)的概念，即将原本需要一次性遍历堆内存的操作改为增量标记的方式，先标记堆内存中的一部分对象，然后暂停，将执行权重新交给 JS 主线程，待主线程任务执行完毕后再从原来暂停标记的地方继续标记，直到标记完整个堆内存。这个理念其实有点像 React 框架中的 Fiber 架构，只有在浏览器的空闲时间才会去遍历 Fiber Tree 执行对应的任务，否则延迟执行，尽可能少地影响主线程的任务，避免应用卡顿，提升应用性能。
+- 得益于增量标记的好处，V8 引擎后续继续引入了延迟清理(lazy sweeping)和增量式整理(incremental compaction)，让清理和整理的过程也变成增量式的。同时为了充分利用多核 CPU 的性能，也将引入并行标记和并行清理，进一步地减少垃圾回收对主线程的影响，为应用提升更多的性能。
+
+<br/>
+
+### 4.10.5 内存泄漏
+
+<br/>
+
+- 意外的全局变量
+- 闭包引起
+- 没有清理的 DOM 元素
+- 被遗忘的定时器或者回调
+- 子元素存在引用引起的内存泄露（引用计数策略）
+
+如何定位内存泄漏？
+
+1. 先用 Performance。 当我们怀疑页面发生了内存泄漏的时候，可以先用 Performance 录制一段时间内页面的性能变化。如果录制结束后，看到内存的下限在不断升高的话，你就要注意了 —— 这里有可能发生了内存泄漏。
+2. 通过 Memory 面板定位内存。
+
+- 打开 DevTools, 切换至 Memory 面板
+- 先记录一个堆内存快照（占大内存的对象是怀疑对象）
+- 在你的页面上执行可能发生泄漏的操作
+- 再记录一个堆内存快照
+- 重复执行多几遍步骤 3
+- 最后记录一个堆内存快照
+- 选择最后一个堆内存快照，找到顶栏的“All objects”, 切换至”Objects allocated between snapshots 1 and 2”（也可以对 2，3 执行同样的操作）
+
+<br/>
+
+## 4.11 缓存机制
+
+<br/>
+
+浏览器会拷贝一份已经请求过的 web 资源在内存或硬盘中。当下一个请求到来的时候，如果是相同的 URL，浏览器会根据缓存机制决定是直接使用副本响应访问请求还是向源服务器再次发起请求。使用缓存有以下的优点：
+
+- 减少网络带宽消耗
+- 降低服务器压力
+- 减少网络延迟
+
+浏览器的缓存分成强缓存和协商缓存两种。对应的字段有
+
+- 强缓存：Expires 和 Cache-Control。
+- 协商缓存：Last-Modified / If-Modified-Since 和 Etag / If-None-Match，其中 Etag / If-None-Match 的优先级比 Last-Modified / If-Modified-Since 高。
+
+浏览器再向服务器请求资源时,首先会判断是否命中强缓存,再判断是否命中协商缓存。简单的流程图如下：
+
+![缓存机制.png](./Html/img/cache.jpg)
+
+<br/>
+
+## 4.12 安全
+
+<br/>
+
+### 4.12.1 XSS 攻击全称跨站脚本攻击
+
+<br/>
+
+- XSS 根源就是没完全过滤客户端提交的数据
+- 预防：
+  - 使用 HttpOnly 的 cookies: response.addHeader("Set-Cookie", "HttpOnly"); js 脚本将访问不了 cookies
+  - Java 有个开源项目 Anti-Samy
+  - 输入输出检测
+  - 字符实体转义
+
+<br/>
+
+### 4.12.2 CSRF 跨站点请求伪造
+
+<br/>
+
+- 攻击者盗用了你的身份，以你的名义发送恶意的请求
+
+- 例子：
+
+```
+某电商网站A，你购买时候支付的操作是：http://www.market.com/Transfer.php?bankId=11&money=1000;
+某危险网站B，他有段代码是 <img src=http://www.market.com/Transfer.php?bankId=11&money=1000>
+```
+
+你在访问 A 网站进行支付操作时，A 网站保存了你的 cookie 信息，如果 B 网站拿到了你的 cookie 或者他伪造的数据刚好就是 cookie 里的，就能伪造你的请求，进行同样的支付操作。，那么银行卡就多扣了 1000 块钱
+
+- 预防
+  - 验证码(用户体验)
+  - HTTP 头 referer check（并非所有请求都有 referer，比如 https 跳转 http，页面第一次打开）
+  - 参数加密。http://host/path/delete?username=md5(salt+abc) 缺点：数据分析困难，salt 改变无法被用户收藏。
+  - Anti sCSRF Token： 请求携带 token，服务端校验
+
+<br/>
+
+## 4.13 Cookie, Session, Token, SessionStorage、LocalStorage
+
+<br/>
+
+### 4.13.1 Cookie, Session
+
+<br/>
+
+1. cookie 数据存放在客户的浏览器上，session 数据放在服务器上。
+2. cookie 不是很安全，别人可以分析存放在本地的 COOKIE 并进行 COOKIE 欺骗考虑到安全应当使用 session。
+3. session 会在一定时间内保存在服务器上。当访问增多，会比较占用你服务器的性能考虑到减轻服务器性能方面，应当使用 COOKIE。
+4. 单个 cookie 保存的数据不能超过 4K，很多浏览器都限制一个站点最多保存 20 个 cookie。
+5. 一般会在 cookies 存储 session id
+
+<br/>
+
+### 4.13.2 Cookie, SessionStorage, LocalStorage
+
+<br/>
+
+- cookie 在浏览器和服务器间来回传递，cookie 数据还有路径（path）的概念，可以限制。cookie 只属于某个路径下
+
+- 存储大小：cookie 数据不能超过 4K，webStorage 可以达到 5M 或更大
+
+- 数据的有效期不同：sessionStorage：仅在当前的浏览器窗口关闭有效；localStorage：始终有效，窗口或浏览器关闭也一直保存，因此用作持久数据；cookie：只在设置的 cookie 过期时间之前一直有效，即使窗口和浏览器关闭
+
+- 作用域不同：sessionStorage：不在不同的浏览器窗口中共享，即使是同一个页面；localStorage：在所有同源窗口都是共享的；cookie：也是在所有同源窗口中共享的
+
+<br/>
+
+### 4.13.3 Token
+
+<br/>
+
+随着 Web，移动端的兴起，基于服务器验证的方式逐渐暴露出了问题。尤其在可拓展性方面。
+
+1. Session 存储在服务端上，越来越多的用户加剧了服务端内存的开销，还需要考虑分布式一致性的问题。
+2. CROS 跨域资源共享，会出现禁止请求的情况
+3. CSRF 跨站请求伪造
+
+在这样的情况下，token 诞生了。基本思路如下：
+
+1. 用户登录校验，检验成功后就返回 token 给客户端
+2. 客户端存储 token，每次请求时携带 token 到服务端
+3. 服务端对 token 进行校验，成功则返回数据，失败则返回错误码
+
+token 在服务端一般会使用 SHA256 算法和密钥加密用户的信息，有时还会拼接上固定的字符串。在客户端上一般会放在请求头上（Authorization 字段）或者 cookie 里
+
+token 的优势在于：
+
+- 无状态的，可扩展的
+- 安全性，在请求中发送 token 而不是发送 cookie 能够防止 CSPF，且 token 是有时效性的
+- 多平台跨域，需要设置 CORS 请求头：Access-Control-Allow-Origin: \*
+
+<br/>
+
+### 4.13.4 限制 Cookies 访问
+
+<br/>
+
+- httponly: 在 Cookie 中包含 httponly 属性时为 true，表示这个 cookie 不允许通过 JS 来读写；
+- secureonly: 在 Cookie 中包含 secure 属性时为 true，表示这个 cookie 仅在 https 环境下才能使用；
+- hostonly: 获取 Cookie 时，首先要检查 Domain 匹配性，其次才检查 path、secure、httponly 等属性的匹配性。如果 host- only-flag 为 true 时，只有当前域名与该 Cookie 的 Domain 属性完全相等才可以进入后续流程；host-only-flag 为 false 时，符合域规则（domain-matches）的域名都可以进入后续流程。
+
+<br/>
+
+## 4.14 Preload 和 Prefetch
+
+<br/>
+
+### 4.14.1 Preload
+
+<br/>
+
+```html
+<link rel="“preload”" />
+
+// 资源加载完毕后的回调函数
+<link rel="preload" href="..." as="..." onload="preloadFinished()" />
+
+// 使用preload的样式表立即生效
+<link rel="preload" href="style.css" onload="this.rel=stylesheet" />
+
+// 对跨域的文件进行preload时，必须加上 crossorigin 属性
+<link rel="preload" as="font" crossorigin href="s.woff" />
+```
+
+preload 提供了一种声明式的命令，让浏览器提前加载指定资源(加载后并不执行)，需要执行时再执行
+
+这样做的好处在于： 1、将加载和执行分离开，不阻塞渲染和 document 的 onload 事件 2、提前加载指定资源，不再出现依赖的 font 字体隔了一段时间才刷出的情况
+
+【as 属性】
+
+Preload 有 as 属性，浏览器可以设置正确的资源加载优先级，这种方式可以确保资源根据其重要性依次加载， 所以，Preload 既不会影响重要资源的加载，又不会让次要资源影响自身的加载；浏览器能根据 as 的值发送适当的 Accept 头部信息；浏览器通过 as 值能得知资源类型，因此当获取的资源相同时，浏览器能够判断前面获取的资源是否能重用
+
+如果忽略 as 属性，或者错误的 as 属性会使 preload 等同于 XHR 请求，浏览器不知道加载的是什么，因此会赋予此类资源非常低的加载优先级
+
+【二次获取】
+
+1、不使用 as 属性
+
+如果对所 preload 的资源不使用明确的 “as”属性，将会导致二次获取
+
+2、字体文件
+
+preload 字体不带 crossorigin 会二次获取！ 确保对 preload 的字体添加 crossorigin 属性，否则字体文件会被下载两次，这个请求使用匿名的跨域模式。这个建议也适用于字体文件在相同域名下，也适用于其他域名的获取(比如说默认的异步获取)
+
+<br/>
+
+### 4.14.2 Prefetch
+
+<br/>
+
+```html
+<link rel="“prefetch”" />
+```
+
+告诉浏览器加载下一页面可能会用到的资源，在浏览器空闲时间加载。并且，当页面跳转时，未完成的 prefetch 请求不会被中断；
+
+<br/>
+
+### 4.14.3 对比
+
+<br/>
+
+- Chrome 有四种缓存：http cache、memory cache、Service Worker cache 和 Push cache。在 preload 或 prefetch 的资源加载时，两者均存储在 http cache。当资源加载完成后，如果资源是可以被缓存的，那么其被存储在 http cache 中等待后续使用；如果资源不可被缓存，那么其在被使用前均存储在 memory cache；？？？（http cache 是啥）
+- preload 和 prefetch 都没有同域名的限制；
+- preload 主要用于预加载当前页面需要的资源；而 prefetch 主要用于加载将来页面可能需要的资源；
+- 不论资源是否可以缓存，prefecth 会存储在 net-stack cache 中至少 5 分钟；
+- preload 需要使用 as 属性指定特定的资源类型以便浏览器为其分配一定的优先级，并能够正确加载资源；
+- prefetch，preload 同一个请求，会请求两次
+
+<br/>
+
+## 4.15 未归类
+
+<br/>
+
+### 4.15.1 options 预计请求
+
+<br/>
+
+浏览器对复杂跨域请求在真正发送请求之前,会先进行一次预请求,就是参数为 OPTIONS 的第一次请求,他的作用是用于试探性的服务器响应是否正确,即是否能接受真正的请求,如果在 options 请求之后获取到的响应是拒绝性质的,例如 500 等 http 状态,那么它就会停止第二次的真正请求的访问。
+
+同时满足下列以下条件，就属于简单请求，否则属于非简单请求（参考 HTTP 访问控制（CORS））
+
+- 请求方式只能是：GET、POST、HEAD
+- HTTP 请求头限制这几种字段（不得人为设置该集合之外的其他首部字段）： Accept、Accept-Language、Content-Language、Content-Type（需要注意额外的限制）、DPR、Downlink、Save-Data、Viewport-Width、Width
+- Content-type 只能取：application/x-www-form-urlencoded、multipart/form-data、text/plain
+
+option 请求：
+
+- Access-Control-Request-Method: 该字段的值对应当前请求类型，例如 GET、POST、PUT 等等。浏览器会自动处理。
+- Access-Control-Request-Headers: 该字段的值对应当前请求可能会携带的额外的自定义 header 字段名，多个字段用逗号分割。
+
+option 响应：
+
+对于 OPTIONS 请求，按照规范实现的服务端会响应一组 HTTP header，但不会返回任何实体内容。如果服务端支持该跨域请求，建议返回 204 状态码（返回 200 也可以）；如果不支持，建议返回 403 状态码（返回 404 或其他错误状态码也可以）。
+
+- Access-Control-Allow-Origin: 允许哪些域被允许跨域，例如 http://qq.com 或 https://qq.com，或者设置为 \* ，即允许所有域访问
+- Access-Control-Allow-Credentials: 是否携带票据访问(对应 fetch 方法中 credentials)，当该值为 true 时，Access-Control-Allow-Origin 不允许设置为\*
+- Access-Control-Allow-Methods: 标识该资源支持哪些方法，例如：POST, GET, PUT, DELETE
+- Access-Control-Allow-Headers: 标识允许哪些额外的自定义 header 字段和非简单值的字段
+- Access-Control-Max-Age: 表示可以缓存 Access-Control-Allow-Methods 和 Access-Control-
+
+如何避免？
+
+通过服务器端设置 Access-Control-Max-Age 字段针对这一个请求 URL 和相同的 header 的下一次请求可不用发预检请求
+
+<br/>
 
 <br/>
 <br/>

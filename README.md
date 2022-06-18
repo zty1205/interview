@@ -217,6 +217,49 @@
   - 5.16 其他
     - 5.16.1 为什么 data 是一个函数
     - 5.16.2 虚拟 DOM
+- 六、微信
+  - 6.1 基本概念
+    - 6.1.1 不同类型的 id
+  - 6.2 小程序-WXML 语法
+    - 6.2.1 数据绑定
+    - 6.2.2 列表渲染
+    - 6.2.3 条件渲染
+    - 6.2.4 模板
+  - 6.3 小程序-wxs
+    - 6.3.1 声明和使用
+    - 6.3.2 模块化
+    - 6.3.3 基本类型
+    - 6.3.4 js 支持情况
+  - 6.4 小程序-事件系统
+    - 6.4.1 事件和传参
+    - 6.4.2 捕获，冒泡，互斥
+    - 6.4.3 WXS 响应事件
+  - 6.5 小程序-生命周期
+    - 6.5.1 生命周期顺序
+    - 6.5.2 App 生命周期
+    - 6.5.3 页面生命周期
+    - 6.5.4 组件生命周期
+  - 6.6 小程序-授权
+  - 6.7 小程序-原理
+    - 6.7.1 渲染层和逻辑层
+    - 6.7.2 运行环境
+    - 6.7.3. 运行机制
+    - 6.7.4 更新机制
+    - 6.7.5 简诉原理
+    - 6.7.6 优缺点
+    - 6.7.7 小程序-问题
+    - 6.7.8 兼容性问题
+    - 6.7.9 小程序-优化
+    - 6.7.10 代码体积优化
+    - 6.7.11 代码注入优化
+    - 6.7.12 首屏渲染优化
+  - 6.8 小程序-其他
+    - 6.8.1 rpx
+    - 6.8.2 网络请求
+    - 6.8.3 block 标签
+    - 6.8.4 微信小程序是单页应用吗
+    - 6.8.5 和 vue 的区别
+  - 6.9 微信公众号
 
 <br/>
 
@@ -4175,6 +4218,672 @@ JavaScript 只有函数构成作用域(注意理解作用域，只有函数{}构
   - fnContext:函数式组件对应的 Vue 实例
   - fnOptions: 组件的 option 选项
 - 克隆节点：(cloned.isCloned = true)
+
+<br/>
+<br/>
+
+# 六、微信
+
+## 6.1 基本概念
+
+### 6.1.1 不同类型的 id
+
+AppID
+
+- AppID 是不同类型的产品的帐号 ID ,是帐号的唯一标识符。 |
+- 例如公众号的 AppID、小程序的 AppID、开放平台的 AppID、第三方平台的 AppID、移动应用的 AppID、网站应用的 AppID、小商店的 AppID 等等。 |
+
+openid
+
+- openid 是微信用户在不同类型的产品的身份 ID。微信用户访问公众号、小程序、移动应用、网站应用、小商店等都会有唯一的 openid，但同一个微信用户访问不同的产品生成的 openid 也是不一样的。
+- 例如，对于不同公众号，同一用户的 openid 不同；同理，对于不同的小程序，同一用户的 openid 也是不同的 |
+
+unionid
+
+- unionid 是微信用户在同一个开放平台下的产品的身份 ID。
+- 如果开发者拥有多个移动应用、网站应用、和公众帐号（即公众号和小程序），可通过 UnionID 来区分用户的唯一性，因为只要是同一个微信开放平台帐号下的移动应用、网站应用和公众帐号，用户的 UnionID 是唯一的。即，同一用户，对同一个微信开放平台下的不同应用，UnionID 是相同的。
+
+<br/>
+
+## 6.2 小程序-WXML 语法
+
+### 6.2.1 数据绑定
+
+```html
+<view>{{message}}</view>
+```
+
+```javascript
+Page({
+  data: {
+    message: 'Hello MINA!'
+  }
+});
+```
+
+### 6.2.2 列表渲染
+
+- 注意 for 要带{{}}，后面的不需要
+- 列表渲染默认的 index 是“index”，默认的 item=“item”
+- \*this 表示遍历的项本事，也可以用其他 unique 的属性代替
+
+```html
+<view wx:for="{{array}}" wx:for-index="idx" wx:for-item="itemName" wx:key="*this">{{idx}}: {{itemName.message}}</view>
+```
+
+```javascript
+Page({
+  data: {
+    array: [
+      {
+        message: 'one'
+      },
+      {
+        message: 'two'
+      },
+      {
+        message: 'three'
+      }
+    ]
+  }
+});
+```
+
+### 6.2.3 条件渲染
+
+- 注意条件判断需要{{}}
+- 注意 elif 的写法
+
+```html
+<view wx:if="{{n % 3 === 0}}">3倍</view>
+<view wx:elif="{{n%2 === 0}}">2倍</view>
+<view wx:else>其他倍数</view>
+```
+
+```javascript
+Page({
+  data: {
+    array: [
+      {
+        message: 'one'
+      },
+      {
+        message: 'two'
+      },
+      {
+        message: 'three'
+      }
+    ]
+  }
+});
+```
+
+### 6.2.4 模板
+
+- 模板：WXML 提供模板（template），可以在模板中定义代码片段，然后在不同的地方调用。模板可以在同一代码文件，也可在其他文件
+
+- 定义模板：使用 name 属性，作为模板的名字。然后在 template 内定义代码片
+
+- 使用模：使用 is 属性，声明需要的使用的模板，然后将模板所需要的 data 传入
+
+- 模板的作用域：模板拥有自己的作用域，只能使用 data 传入的数据以及模板定义文件中定义的 <wxs 模块
+
+- import：import 可以在该文件中使用目标文件定义的 template
+
+- import 的作用域：import 有作用域的概念，即只会 import 目标文件中定义的 template，而不会 import 目标文件 import 的 template
+
+- include：include 可以将目标文件除了 template， wxs 外的整个代码引入，相当于是拷贝到 include 位置
+
+```html
+<!-- 模板 msg.wxml -->
+<template name="msgItem">
+  <view>模板msg: {{msg}}</view>
+</template>
+```
+
+```html
+<!-- 模板 A.wxml -->
+<view>include A Template</view>
+```
+
+```html
+<import src="msg.wxml"></import>
+
+<template is="msgItem" data="{{msg: '传入的msg'}}"></template>
+<include src="A.wxml"></include>
+```
+
+<br/>
+
+## 6.3 小程序-wxs
+
+WXS（WeiXin Script）是小程序的一套脚本语言，结合 WXML，可以构建出页面的结构。
+
+WXS 与 JavaScript 是不同的语言，有自己的语法，与 js 类似，但不完全一致。
+
+**注意事项**
+
+- WXS 不依赖于运行时的基础库版本，可以在所有版本的小程序中运行。
+- WXS 与 JavaScript 是不同的语言，有自己的语法，并不和 JavaScript 一致。
+- WXS 的运行环境和其他 JavaScript 代码是隔离的，WXS 中不能调用其他 JavaScript 文件中定义的函数，也不能调用小程序提供的 API。
+- **WXS 函数不能作为组件的事件回调**。
+- 由于运行环境的差异，在 iOS 设备上小程序内的 WXS 会比 JavaScript 代码快 2 ~ 20 倍。在 android 设备上二者运行效率无差异。
+
+### 6.3.1 声明和使用
+
+使用 wxs 标签声明文件或者单独一个文件
+
+module 属性是当前 wxs 标签的模块名。在单个 wxml 文件内，建议其值唯一。有重复模块名则按照先后顺序覆盖（后者覆盖前者）。不同文件之间的 wxs 模块名不会相互覆盖。
+
+module 属性值的命名必须符合下面两个规则：
+
+- 首字符必须是：字母（a-zA-Z），下划线（\_）
+- 剩余字符可以是：字母（a-zA-Z），下划线（\_）， 数字（0-9）
+
+使用 wxs 标签带 src 属性引入 wxs 脚本
+
+src 属性可以用来引用其他的 wxs 文件模块。
+
+引用的时候，要注意如下几点（require 同下）：
+
+- 只能引用 .wxs 文件模块，且必须使用相对路径。
+- wxs 模块均为单例，wxs 模块在第一次被引用时，会自动初始化为**单例对象。多个页面，多个地方，多次引用，使用的都是同一个 wxs 模块对象**。
+- 如果一个 wxs 模块在定义之后，一直没有被引用，则该模块不会被解析与运行。
+- 使用 src 属性后，标签内不能有任何的文本，类似 script 标签
+
+```javascript
+// a.wxs
+var m1 = require('./foo.wxs');
+var msg = 'msg in a.wxs';
+
+module.exports = {
+  msg: msg,
+  foo: m1.foo
+};
+```
+
+```html
+<wxs src="a.wxs" module="tools" />
+<wxs module="m2">var msg = "hello world"; module.exports.message = msg;</wxs>
+
+<view class="page">
+  <view class="z_block">
+    <view class="title">使用内部WXS</view>
+    <view class="ctx">{{m2.message}}</view>
+  </view>
+  <view class="z_block">
+    <view class="title">使用外部WXS</view>
+    <view class="ctx">
+      <view>{{tools.msg}}</view>
+      <view>{{tools.foo()}}</view>
+    </view>
+  </view>
+</view>
+```
+
+**注意事项**
+
+- **wxs 模块只能在定义模块的 WXML 文件中被访问到**。使用 include 或 import 时，wxs 模块不会被引入到对应的 WXML 文件中。
+- templat> 标签中，只能使用定义该 template 的 WXML 文件中定义的 wxs 模块。
+
+### 6.3.2 模块化
+
+WXS 代码可以编写在 wxml 文件中的 wxs 标签内，或以 .wxs 为后缀名的文件内。每一个 .wxs 文件和 wxs 标签都是一个单独的模块。每个模块都自己独立的作用域。即在一个模块里面定义的变量与函数，默认为私有的，对其他模块不可见。一个模块要想对外暴露其内部的私有变量与函数，只能通过 module.exports 实现。
+
+- 模块使用 require 和 module.exports，没有 cjs 的 exports
+- 模块引用后成为单例，和 cjs 的模块拷贝不同
+
+### 6.3.3 基本类型
+
+- WXS 中的变量均为值的引用。
+- 没有声明的变量直接赋值使用，会被定义为全局变量。
+- 如果只声明变量而不赋值，则默认值为 undefined。
+- var 表现与 javascript 一致，会有变量提升。
+
+变量命名必须符合下面两个规则：
+
+- 首字符必须是：字母（a-zA-Z），下划线（\_）
+- 剩余字符可以是：字母（a-zA-Z），下划线（\_）， 数字（0-9）
+
+WXS 语言目前共有以下几种数据类型, 区分类型可以使用 constructor 属性 或 typeof
+
+- number ： 数值
+- string ：字符串
+- boolean：布尔值
+- object：对象
+- function：函数
+- array : 数组
+- date：日期
+- regexp：正则
+
+|   类型   |  描述  | constructor |  typeof  |
+| :------: | :----: | :---------: | :------: |
+|  number  |  数值  |   Number    |  number  |
+|  string  | 字符串 |   String    |  string  |
+| boolean  | 布尔值 |   Boolean   | boolean  |
+|  object  |  对象  |   Object    |  object  |
+| function |  函数  |  Function   | function |
+|  array   |  数组  |    Array    |  object  |
+|   date   |  日期  |    Date     |  object  |
+|  regexp  |  正则  |   RegExp    |  object  |
+
+注意：
+
+- 生成 date 对象需要使用 getDate 函数， 直接使用，不需要 new
+- 生成 regexp 对象需要使用 getRegExp 函数， 直接使用，不需要 new
+
+```javascript
+var date = getDate(); //返回当前时间对象
+var regexp = getRegExp('x', 'img');
+```
+
+### 6.3.4 js 支持情况
+
+- for 循环只有 for i
+- 基于安全考虑，小程序中不支持动态执行 JS 代码，即：
+- 不支持使用 eval 执行 JS 代码
+- 不支持使用 new Function 创建函数, new Function('return this') 除外
+- 小程序的 JS 执行环境 在不同平台上的执行环境存在差异，因此导致不同平台对 ECMAScript 标准的支持存在差异。小程序基础库为了尽量抹平这些差异，内置了一份 core-js Polyfill。core-js 可以将平台环境缺失的标准 API 补齐。需要注意的是，平台对 ECMAScript 语法的支持差异无法抹平，当你需要使用一些高级语法时（如 async/await 时，则需要借助代码转换工具来支持这些语法。无法被 Polyfill 的 API, Proxy 对象在部分低版本客户端中无法使用，请注意尽量避免使用
+
+注意：
+
+- wxs 的 js 版本表现为为 ES5，开发工具的 js 转 ES5 只对 js 文件有效
+
+<br/>
+
+## 6.4 小程序-事件系统
+
+### 6.4.1 事件和传参
+
+```html
+<view id="outer" mark:outer="1" data-outer="1" class="outer-box" bindtap="handleMPOuter">
+  outer view
+  <view id="inner" mark:inner="2" data-inner="1" class="inner-box" bindtap="handleMPInner">inner view</view>
+</view>
+```
+
+```javascript
+Page({
+  handleMPOuter(e) {
+    console.log('-- outer -- ', e)
+    const douter = e.currentTarget.dataset.outer
+    const mouter = e.mark.outer
+  },,
+  handleMPInner() {
+    console.log('-- inner -- ')
+  }
+})
+```
+
+mark 和 dataset 很相似，主要区别在于： mark 会包含从触发事件的节点到根节点上所有的 mark: 属性值；而 dataset 仅包含一个节点的 data- 属性值。
+
+细节注意事项：
+
+- 如果存在同名的 mark ，父节点的 mark 会被子节点覆盖。
+- 在自定义组件中接收事件时， mark 不包含自定义组件外的节点的 mark 。
+- 不同于 dataset ，节点的 mark 不会做连字符和大小写转换。
+
+**Event 对象**
+
+重要的几个：
+
+- type：代表事件的类型如 tap
+- detail：自定义事件所携带的数据，如表单组件的提交事件会携带用户的输入
+- mark：当事件触发时，事件冒泡路径上所有的 mark 会被合并，并返回给事件回调函数。（即使事件不是冒泡事件，也会 mark 。
+- currentTarget：事件绑定的当前组件
+- target：触发事件的源组件
+
+### 6.4.2 捕获，冒泡，互斥
+
+冒泡事件列表
+
+|        类型        |                                         触发条件                                          |
+| :----------------: | :---------------------------------------------------------------------------------------: |
+|     touchstart     |                                     手指触摸动作开始                                      |
+|     touchmove      |                                      手指触摸后移动                                       |
+|    touchcancel     |                           手指触摸动作被打断，如来电提醒，弹窗                            |
+|      touchend      |                                     手指触摸动作结束                                      |
+|        tap         |                                    手指触摸后马上离开                                     |
+|     longpress      | 手指触摸后，超过 350ms 再离开，如果指定了事件回调函数并触发了这个事件，tap 事件将不被触发 |
+|      longtap       |               手指触摸后，超过 350ms 再离开（推荐使用 longpress 事件代替）                |
+|   transitionend    |                 会在 WXSS transition 或 wx.createAnimation 动画结束后触发                 |
+|   animationstart   |                          会在一个 WXSS animation 动画开始时触发                           |
+| animationiteration |                        会在一个 WXSS animation 一次迭代结束时触发                         |
+|    animationend    |                          会在一个 WXSS animation 动画完成时触发                           |
+|  touchforcechange  |                       在支持 3D Touch 的 iPhone 设备，重按时会触发                        |
+
+### 6.4.3 WXS 响应事件
+
+有频繁用户交互的效果在小程序上表现是比较卡顿的，例如页面有 2 个元素 A 和 B，用户在 A 上做 touchmove 手势，要求 B 也跟随移动，movable-view 就是一个典型的例子。一次 touchmove 事件的响应过程为：
+
+1. touchmove 事件从视图层（Webview）抛到逻辑层（App Service）
+2. 逻辑层（App Service）处理 touchmove 事件，再通过 setData 来改变 B 的位置
+
+一次 touchmove 的响应需要经过 2 次的逻辑层和渲染层的通信以及一次渲染，通信的耗时比较大。此外 setData 渲染也会阻塞其它脚本执行，导致了整个用户交互的动画过程会有延迟。
+
+使用 wxs 响应事件的思路是减少通信的次数，让事件在视图层（Webview）响应。小程序的框架分为视图层（Webview）和逻辑层（App Service），这样分层的目的是管控，开发者的代码只能运行在逻辑层（App Service），而这个思路就必须要让开发者的代码运行在视图层（Webview）
+
+使用 WXS 函数用来响应小程序事件，目前只能响应内置组件的事件，不支持自定义组件事件。WXS 函数的除了纯逻辑的运算，还可以通过封装好的 ComponentDescriptor 实例来访问以及设置组件的 class 和样式，对于交互动画，设置 style 和 class 足够了。
+
+```javascript
+var wxsFunction = function(event, ownerInstance) {
+    var instance = ownerInstance.selectComponent('.classSelector') // 返回组件的实例
+    instance.setStyle({
+        "font-size": "14px" // 支持rpx
+    })
+    instance.getDataset()
+    instance.setClass(className)
+    instance.callMethod(funcName:string, args:object) // 调用当前组件/页面在逻辑层（App Service）定义的函数
+    // ...
+    return false // 不往上冒泡，相当于调用了同时调用了 stopPropagation 和preventDefault
+}
+```
+
+注意：
+
+- WXS 函数必须用{{}}括起来。当 prop 的值被设置 WXS 函数就会触发，而不只是值发生改变，所以在页面初始化的时候会调用一次函数
+- 目前还不支持原生组件的事件、input 和 textarea 组件的 bindinput 事件
+
+<br/>
+
+## 6.5 小程序-生命周期
+
+### 6.5.1 生命周期顺序
+
+1. App onLaunch 监听小程序初始化
+2. App onShow 监听小程序启动或切前台
+3. Compnent created 组件实例刚刚被创建
+4. Compnent attached 组件实例进入页面节点树
+5. Page onLoad 监听页面加载
+6. pageLifetimes show 组件所在的页面被展示
+7. Page onShow 监听页面显示
+8. Compnent ready 组件在视图层布局完成
+9. Page onReady 监听页面初次渲染完成
+
+- 切换后台，再切回来
+
+10. pageLifetimes hide 组件所在的页面被隐藏
+11. Page onHide 监听页面隐藏
+12. App onHide 监听小程序切后台
+13. App onShow 监听小程序启动或切前台
+14. pageLifetimes show 组件所在的页面被展示
+15. Page onShow 监听页面显示
+
+- 路由跳转
+
+10. pageLifetimes hide 组件所在的页面被隐藏
+11. Page onHide 监听页面隐藏
+
+- 从路由栈销毁（switchTo, back 等）
+
+10. Page onUnload 监听页面卸载
+11. Compnent detached 组件实例被从页面节点树移除
+
+- 规律
+
+- 组件的页面周期要先于当前页面的同一个生命周期
+- 创建时组件的生命周期快于页面，销毁时慢于页面
+
+### 6.5.2 App 生命周期
+
+- onLaunch 监听小程序初始化
+- onShow 监听小程序启动或切前台
+- onHide 监听小程序切后台
+- onError 错误监听函数
+- onPageNotFound 页面不存在监听函数
+- onUnhandledRejection 未处理的 Promise 拒绝事件监听函数
+- onThemeChange 监听系统主题变化
+
+### 6.5.3 页面生命周期
+
+- onLoad 监听页面加载
+- onReady 监听页面初次渲染完成
+- onShow 监听页面显示
+- onHide 监听页面隐藏
+- onUnload 监听页面卸载
+- onPullDownRefresh 监听用户下拉动作
+- onReachBottom 页面上拉触底事件的处理函数
+- onShareAppMessage 用户点击右上角分享
+
+### 6.5.4 组件生命周期
+
+- created 组件实例刚刚被创建 这里不能调用 setData
+- attached 组件实例进入页面节点树 这里可以调用了
+- ready 组件在视图层布局完成
+- moved 组件实例被移动到节点树另一个位置
+- detached 组件实例被从页面节点树移除
+- error 每当组件方法抛出错误时执行
+
+组件所在页面的生命周期
+
+- show 组件所在的页面被展示
+- hide 组件所在的页面被隐藏
+- resize 组件所在的页面尺寸变化
+
+<br/>
+
+## 6.6 小程序-授权
+
+部分接口需要经过用户授权同意才能调用。
+
+授权在代码上可分成两种：
+
+- 通过 button 和 open-type 来获取，比如用户信息，手机号通过回调获取数据（加密数据），或者打开某页面
+- 通过 wx.authorize 后调用对应接口，比如地理位置，麦克风等
+
+一旦用户明确同意或拒绝过授权，其授权关系会记录在后台，直到用户主动删除小程序。用户可以在小程序设置界面中控制对该小程序的授权状态。
+
+<br/>
+
+## 6.7 小程序-原理
+
+### 6.7.1 渲染层和逻辑层
+
+首先，我们来简单了解下小程序的运行环境。小程序的运行环境分成渲染层和逻辑层，其中 WXML 模板和 WXSS 样式（还有 WXS）工作在渲染层，JS 脚本工作在逻辑层。
+
+小程序的渲染层和逻辑层分别由 2 个线程管理：渲染层的界面使用了 WebView 进行渲染；逻辑层采用 JsCore 线程运行 JS 脚本。一个小程序存在多个界面，所以渲染层存在多个 WebView 线程，这两个线程的通信会经由微信客户端（下文中也会采用 Native 来代指微信客户端）做中转，逻辑层发送网络请求也经由 Native 转发，小程序的通信模型下图所示。
+
+逻辑层在 JavaScript 的基础上，我们增加了一些功能如 APP, Page 方法，微信用户数据等特有能力，以方便小程序的开发，但小程序框架的逻辑层并非运行在浏览器中，因此 JavaScript 在 web 中一些能力都无法使用，如 window，document 等
+
+### 6.7.2 运行环境
+
+|   平台   |   逻辑层内核   |                  视图层内核                   |
+| :------: | :------------: | :-------------------------------------------: |
+|   IOS    | JavaScriptCore |                   WKWebView                   |
+| Android  |       V8       | 基于 Mobile Chromium 内核的微信自研 XWeb 引擎 |
+| Windows  | Chromium 内核  |                 Chromium 内核                 |
+| 开发工具 |     NW.js      |               Chromium Webview                |
+
+### 6.7.3. 运行机制
+
+小程序启动：
+
+- 冷启动：如果用户首次打开，或小程序销毁后被用户再次打开，此时小程序需要重新加载启动，即冷启动。
+- 热启动：如果用户已经打开过某小程序，然后在一定时间内再次打开该小程序，此时小程序并未被销毁，只是从后台状态进入前台状态，这个过程就是热启动
+
+小程序进入「后台」状态一段时间后（目前是 5 秒），微信会停止小程序 JS 线程的执行，小程序进入「挂起」状态。此时小程序的内存状态会被保留，但开发者代码执行会停止，事件和接口回调会在小程序再次进入「前台」时触发。
+
+如果用户很久没有使用小程序，或者系统资源紧张，小程序会被「销毁」，即完全终止运行。具体而言包括以下几种情形：
+
+- 当小程序进入后台并被「挂起」后，如果很长时间（目前是 30 分钟）都未再次进入前台，小程序会被销毁。
+- 当小程序占用系统资源过高，可能会被系统销毁或被微信客户端主动回收、
+
+相关 API
+
+- 每当小程序可能被销毁之前，页面回调函数 onSaveExitState 会被调用。如果想保留页面中的状态，可以在这个回调函数中“保存”一些数据，下次启动时可以通过 exitState 获得这些已保存数据。
+
+```javascript
+Page({
+  onLoad: function() {
+    var prevExitState = this.exitState // 尝试获得上一次退出前 onSaveExitState 保存的数据
+    if (prevExitState !== undefined) { // 如果是根据 restartStrategy 配置进行的冷启动，就可以获取到
+      prevExitState.myDataField === 'myData'
+    }
+  },
+  onSaveExitState: function() {
+    var exitState = { myDataField: 'myData' } // 需要保存的数据
+    return {
+      data: exitState,
+      expireTimeStamp: Date.now() + 24 * 60 * 60 * 1000 // 超时时刻
+    }
+  }
+}
+```
+
+### 6.7.4 更新机制
+
+开发者在管理后台发布新版本的小程序之后，微信客户端会有若干个时机去检查本地缓存的小程序有没有新版本，并进行小程序的代码包更新。但如果用户本地有小程序的历史版本，此时打开的可能还是旧版本。
+
+- 启动时同步更新
+  - 定期检查版本更新，具体几小时未知
+  - 用户长时间未使用小程序，具体时长未知
+- 启动时异步更新
+  - 即使启动前未发现更新，小程序每次冷启动时，都会异步检查是否有更新版本。如果发现有新版本，将会异步下载新版本的代码包。但当次启动仍会使用客户端本地的旧版本代码，即新版本的小程序需要等**下一次冷启动**才会使用。
+- 开发者手动触发更新
+  - 在启动时异步更新的情况下，如果开发者希望立刻进行版本更新，可以使用 wx.getUpdateManager API 进行处理。在有新版本时提示用户重启小程序更新新版本。
+
+### 6.7.5 简诉原理
+
+- 微信小程序采用 JavaScript、WXML、WXSS 三种技术进行开发,本质就是一个单页面应用，所有的页面渲染和事件处理，都在一个页面内进行，但又可以通过微信客户端调用原生的各种接口
+- 微信的架构，是数据驱动的架构模式，它的 UI 和数据是分离的，所有的页面更新，都需要通过对数据的更改来实现
+- 小程序分为两个部分 webview 和 appService。其中 webview 主要用来展现 UI ，appService 有来处理业务逻辑、数据及接口调用。它们在两个进程中运行，通过系统层 JSBridge 实现通信，实现 UI 的渲染、事件的处理
+
+### 6.7.6 优缺点
+
+优势：
+
+无需下载，通过搜索和扫一扫就可以打开。良好的用户体验：打开速度快。开发成本要比 App 要低。安卓上可以添加到桌面，与原生 App 差不多。为用户提供良好的安全保障。小程序的发布，微信拥有一套严格的审查流程，不能通过审查的小程序是无法发布到线上的。劣势：
+
+限制较多。页面大小不能超过 1M。不能打开超过 5 个层级的页面。样式单一。小程序的部分组件已经是成型的了，样式不可以修改。例如：幻灯片、导航。推广面窄，不能分享朋友圈，只能通过分享给朋友，附近小程序推广。其中附近小程序也受到微信的限制。依托于微信，无法开发后台管理功能。
+
+### 6.7.7 小程序-问题
+
+### 6.7.8 兼容性问题
+
+- 小程序输入框字体的 font-family 变形会使得输入框聚焦时 placehoder 抖动。 [无解]
+- 针对手写输入法 input 使用 change 事件 textaera 使用 blur 事件， 因为可能 input 会找不到（兼容性）
+- 微信获取手机号（首次使用，多个手机号）可能会出现验证码，如果收不到手机号可能需要排查手机号是否一致短信是否拦截，或重启 https://developers.weixin.qq.com/community/develop/doc/0004c0be8c8080df0d7af1b6151000
+- 系统禁用位置权限会导致微信小程序获取不到微信信息，authseting 有时候看不到授权情况，比删了小程序后
+- 样式 cursor: pointer;在安卓手机上 会使用 view 等容器产生点击高亮 蓝色效果
+- 手机更改 app 的权限 app 需要重启才会生效
+- 0.5px 的发丝线全边框 可以用 1px 的伪类 加 旋转 360 实现， 但仍然部分机型不行
+- input 绑定 input 事件 返回 promise 原因：由于 bindinput 方法会自动返回当前 input 输入的值，而当 bindinput 绑定的方法 handleInputChange 是一个 async 异步函数，返回的是 promise 对象，所以导致输入框内反显为[object promise]；解决方法：handleInputChange 函数去掉异步，在函数内部需要发请求的代码重新定义一个 async 函数调用，即可。
+- 小程序 input-number 支持 maxlength【开发工具不能输入，但真机还能输入，虽然 value 还是返回 4 位】, 但是 web 不支持 为啥不支持？因为只支持以下几种 maxlength 只支持 password, search, tel, text, url value  的最大长度
+
+### 6.7.9 小程序-优化
+
+### 6.7.10 代码体积优化
+
+- 分包加载：使用 分包加载 是优化小程序启动耗时效果最明显的手段。
+  - 承载更多功能：小程序单个代码包的体积上限为 2M，使用分包可以提升小程序代码包总体积上限，承载更多的功能与服务。
+  - 降低代码包下载耗时：使用分包后可以显著减少启动时需要下载的代码包大小，在不影响功能正常使用的前提下，有效降低启动耗时。
+  - 降低小程序代码注入耗时：若未开启按需注入，小程序编译时会将所有 js 文件打包成同一个文件一次性的注入，并执行所有页面和自定义组件的代码。分包后可以降低注入和实际执行的代码量，从而降低注入耗时。
+  - 降低页面渲染耗时：使用分包可以避免不必要的组件和页面初始化。
+  - 降低内存占用：分包能够实现页面、组件和逻辑较粗粒度的按需加载，从而降低内存的占用。
+- 独立分包：小程序中的某些场景（如广告页、活动页、支付页等），通常功能不是很复杂且相对独立，对启动性能有很高的要求。独立分包可以独立于主包和其他分包运行。从独立分包页面进入小程序时，不需要下载主包。建议开发者将部分对启动性能要求很高的页面放到特殊的独立分包中。
+- 分包预加载：用户在使用小程序过程中跳转到分包内页面时，需要等待分包下载完成后才能进入页面，造成页面切换的延迟，影响小程序的使用体验。分包预下载便是为了解决首次进入分包页面时的延迟问题而设计的。
+- 避免非必要的全局自定义组件和插件：在 app.json 中通过 usingComponents 全局引用的自定义组件和通过 plugins 全局引入的插件，会在小程序启动时随主包一起下载和注入 JS 代码，影响启动耗时。
+- 控制代码包内的资源文件：在代码包内的图片一般应只包含一些体积较小的图标，避免在代码包中包含或在 WXSS 中使用 base64 内联过多、过大的图片等资源文件。这类文件应尽可能部署到 CDN，并使用 URL 引入。
+- 及时清理无用代码和资源：使用微信开发者工具提供的「代码静态依赖分析」，不定期地分析代码包的文件构成和依赖关系，以此优化代码包大小和内容。
+
+### 6.7.11 代码注入优化
+
+- 使用按需注入：在 app.json 中添加配置。 通常情况下，在小程序启动时，启动页面依赖的所有代码包（主包、分包、插件包、扩展库等）的所有 JS 代码会全部合并注入，包括其他未访问的页面以及未用到自定义组件，同时所有页面和自定义组件的 JS 代码会被立刻执行。这造成很多没有使用的代码在小程序运行环境中注入执行，影响注入耗时和内存占用。
+
+```json
+{
+  "lazyCodeLoading": "requiredComponents"
+}
+```
+
+- 启动过程中减少同步 API 的调用，同步 API 虽然使用起来更简单，但是会阻塞当前 JS 线程，影响代码执行。
+- 避免启动过程进行复杂运算
+
+注意：
+
+- 启用按需注入后，小程序仅注入当前访问页面所需的自定义组件和页面代码。未访问的页面、当前页面未声明的自定义组件不会被加载和初始化，对应代码文件将不被执行。请开发者修改配置后务必确认小程序的表现正常。
+- 在开启「按需注入」特性的前提下，「用时注入」可以指定一部分自定义组件不在小程序启动时注入，而是在真正渲染的时候才进行注入。在已经指定 lazyCodeLoading 为 requiredComponents 的情况下，为自定义组件配置 占位组件，组件就会自动被视为用时注入组件：
+
+### 6.7.12 首屏渲染优化
+
+页面首屏渲染的优化，目的是让「首页渲染完成」(Page.onReady) 尽可能提前。但很多情况下「首页渲染完成」可能还是空白页面，因此更重要的是让用户能够更早的看到页面内容（First Paint 或 First Contentful Paint）。
+
+- 避免引用未使用的自定义组件
+- 精简首屏数据
+- 提前首屏数据请求：：搭配数据预拉取和周期性更新
+- 使用骨架屏
+- 启动初始渲染缓存。 有静态和动态（调用 api 更新数据）两种
+
+小程序页面的初始化分为两个部分。
+
+- 逻辑层初始化：载入必需的小程序代码、初始化页面 this 对象（也包括它涉及到的所有自定义组件的 this 对象）、将相关数据发送给视图层。
+- 视图层初始化：载入必需的小程序代码，然后等待逻辑层初始化完毕并接收逻辑层发送的数据，最后渲染页面。在启动页面时，尤其是小程序冷启动、进入第一个页面时，逻辑层初始化的时间较长。在页面初始化过程中，用户将看到小程序的标准载入画面（冷启动时）或可能看到轻微的白屏现象（页面跳转过程中）。
+
+启用初始渲染缓存，可以使视图层不需要等待逻辑层初始化完毕，而直接提前将页面初始 data 的渲染结果展示给用户，这可以使得页面对用户可见的时间大大提前。它的工作原理如下：
+
+- 在小程序页面第一次被打开后，将页面初始数据渲染结果记录下来，写入一个持久化的缓存区域（缓存可长时间保留，但可能因为小程序更新、基础库更新、储存空间回收等原因被清除）；
+- 在这个页面被第二次打开时，检查缓存中是否还存有这个页面上一次初始数据的渲染结果，如果有，就直接将渲染结果展示出来；
+- 如果展示了缓存中的渲染结果，这个页面暂时还不能响应用户事件，等到逻辑层初始化完毕后才能响应用户事件。
+
+更多见https://developers.weixin.qq.com/miniprogram/dev/framework/view/initial-rendering-cache.html
+
+<br/>
+
+## 6.8 小程序-其他
+
+### 6.8.1 rpx
+
+- rpx 是微信小程序独有的、解决屏幕自适应的尺寸单位
+- 可以根据屏幕宽度进行自适应，不论大小屏幕，规定屏幕宽为 750rpx
+- 通过 rpx 设置元素和字体的大小，小程序在不同尺寸的屏幕下，可以实现自动适配
+
+rpx 和 px 之间的换算
+
+- 以 iPhone6 为例，iPhone6 的屏幕宽度为 375px，共有 750 个物理像素，则 750rpx = 375px = 750 物理像素
+- 得出公式：1 rpx = 0.5 px = 1 物理像素
+
+### 6.8.2 网络请求
+
+- 在微信小程序进行网络通信，只能和指定的域名进行通信。小程序后台-开发设置中配置。
+  - 域名只支持 https 和 wss 协议。
+  - 域名不能使用 ip 地址或 localhost。
+  - 域名必须经过 ICP 备案。
+  - 服务器域名一个月内可申请 5 次修改。
+- 小程序没有跨域的限制。 在普通网站中，由于浏览器的同源策略限制，存在数据的跨域请求问题，从而衍生出 JSONP 和 CORS 两种主流的跨域问题解决方案，但是小程序内部运行机制与网页不同，小程序中的代码并不运行在浏览器中，因此小程序开发中，不存在数据的跨域请求限制问题
+
+### 6.8.3 block 标签
+
+block 不渲染节点 类似 vue 中的 template
+
+### 6.8.4 微信小程序是单页应用吗
+
+是，通过路由进行页面切换
+
+### 6.8.5 和 vue 的区别
+
+- 生命周期不一样，微信小程序生命周期比较简单
+- 数据绑定也不同，微信小程序数据绑定需要使用{{}}，vue 直接:就可以 显示与隐藏元素，vue 中，使用 v-if 和 v-show
+- 控制元素的显示和隐藏，小程序中，使用 wx-if 和 hidden 控制元素的显示和隐藏
+- 事件处理不同，小程序中，全用 bindtap(bind+event)，或者 catchtap(catch+event)绑定事件,vue：使用 v-on:event 绑定事件，或者使用@event 绑定事件
+- 数据双向绑定也不也不一样在 vue 中,只需要再表单元素上加上 v-model,然后再绑定 data 中对应的一个值，当表单元素内容发生变化时，data 中对应的值也会相应改变，这是 vue 非常 nice 的一点。微信小程序必须获取到表单元素，改变的值，然后再把值赋给一个 data 中声明的变量。
+
+<br/>
+
+## 6.9 微信公众号
+
+### 6.9.1 微信网页授权
+
+用户在微信客户端中访问第三方网页，公众号可以通过微信网页授权机制，来获取用户基本信息，进而实现业务逻辑。
+
+1. 用户同意授权，获取 code 在确保微信公众账号拥有授权作用域（scope 参数）的权限的前提下（服务号获得高级接口后，默认拥有 scope 参数中的 snsapi_base 和 snsapi_userinfo），引导关注者打开如下页面：
+
+https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect
+
+2. 通过 code 换取网页授权 access_token
+
+3. 刷新 access_token（如果需要）
+
+4. 拉取用户信息(需 scope 为 snsapi_userinfo)
 
 <br/>
 <br/>

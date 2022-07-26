@@ -260,6 +260,16 @@
     - 6.8.4 微信小程序是单页应用吗
     - 6.8.5 和 vue 的区别
   - 6.9 微信公众号
+- 七、性能优化
+  - 7.1 构建工具带来的
+  - 7.2 浏览器相关
+  - 7.3 js 相关
+  - 7.4 css 相关
+    - 7.4.1 动画相关
+  - 7.5 transform 和 opacity
+  - 7.6 Vue 相关
+  - 7.7 React 相关
+  - 7.8 Tree-Shaking
 
 <br/>
 
@@ -4884,6 +4894,160 @@ https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=RED
 3. 刷新 access_token（如果需要）
 
 4. 拉取用户信息(需 scope 为 snsapi_userinfo)
+
+<br/>
+<br/>
+
+# 七、性能优化
+
+超过 50ms 的任务就可认为是长任务，需要进行优化。
+
+## 7.1 构建工具带来的
+
+- 前置 css，后置 js，防止 js 加载，防止阻塞页面渲染
+- 将小图达成 base64，减少资源请求。[file-loader, url-loader,...]
+- 压缩精简 html，css 和 js，减小打包体积。 [uglifyjs, OptimizeCssAssetsPlugin, ...]
+- css 预处理器，开启 css 编程之路
+- Gzip 压缩打包后的文件，该功能需要服务器支持才能正常显示页面
+
+如果知道客户端是否支持 gzip 呢，请求头中有个 Accept-Encoding 来标识对压缩的支持。客户端 http 请求头声明浏览器支持的压缩方式，服务端配置启用压缩，压缩的文件类型，压缩方式。当客户端请求到服务端的时候，服务器解析请求头，如果客户端支持 gzip 压缩，响应时对请求的资源进行压缩并返回给客户端，浏览器按照自己的方式解析，在 http 响应头，我们可以看到 content-encoding:gzip，这是指服务端使用了 gzip 的压缩方式。
+
+<br/>
+
+## 7.2 浏览器相关
+
+- 使用 CDN 分发网络，请求资源更快
+- 减少 HTTP 请求次数，减少 DNS 查询次数（尽量减少主机名），避免重定向
+- DNS 预获取 link 标签 ref='dns-prefetch' herf=''
+- 使 AJAX 可缓存：get 请求可在客户端缓存；post 请求不能再客户端缓存，但是服务端可以缓存数据（redis，memorycache 等），提高请求速度。
+- 减少 DOM 数量
+- 避免重排和重绘: 减少 DOM 操作，动画优先使用 opacity， transform 属性;
+- 合并 DOM 的读写操作，如使用 document.createDocumentFragment();
+- 使用特殊的函数，优化条件渲染：window.requestAnimationFrame()， window.requestIdleCallback()
+- 时间分片函数，使用 requestAnimationFrame 和 createDocumentFragment
+- 首屏图片优先加载，等首屏图片加载完全后再去加载非首屏图片。对大部分图片，特别是轮播广告中的图片进行按设备尺寸裁剪，减少图片体积，减少网络开销，加快下载速率。（图片的大小与分辨率，图像深度[存储每个像素所用的位数,俗称色彩丰富度]，压缩格式[jpg,png 等]）
+- 14kb 规则，也称为首页 14kb 规则，首页 html 大小不超过 14kb。当然如果启动了服务器端压缩，应该是压缩后的 14kb。当用户打开网页时，收到的 HTML 的第一个 TCP 块为 14kb。这是由于 TCP 慢启动算法为平衡传输速度所导致的。小的 HTML 文件可帮助浏览器在接收到第一个块时就能开始解析。确切地说，在前 14kb 中包含足够的数据将使页面的渲染速度更快。
+
+<br/>
+
+## 7.3 js 相关
+
+- 使用 JavaScript Cache API，我们可以使用 service worker。
+- 延迟不必要的 JS 首屏加载 defer , aysc, 动态添加 script 节点
+- 删除未使用的 JavaScript 和 合并重复的代码 减少编译时间（JIT）
+- 避免内存泄漏 意外的全局变量；没有销毁的计时器；已经删除的 DOM 还是被引用，（删除 DOM 后将变量设值为 null 可以避免这个问题）
+- 避免使用全局变量 & 优先使用局部变量，作用域链查找更快
+- 使用 web workers 处理需要大量执行时间的代码（子线程）
+- 合理使用事件代理。合并类似的操作，节约内存空间，减少 DOM 操作
+- 使用高级函数等，例如 addEvent 的兼容惰性加载函数; map 的性能高于 forEach
+
+<br/>
+
+## 7.4 css 相关
+
+- 避免使用 css 表达式
+- 使用 css sprite 雪碧图，减少图片请求
+  - 减少加载网页图片时对服务器的请求次数,可以合并多数背景图片和小图标，方便在任何位置使用，这样不同位置的请求只需要调用一个图片，从而减少对服务器的请求次数，降低服务器压力，同时提高了页面的加载速度，节约服务器的流量。(主要消耗在 tcp 上)
+  - 提高页面的加载速度:sprite 技术的其中一个好处是图片的加载时间(在有许多 sprite 时，单张图片的加载时间)。由所需图片拼成的一张 GIF 图片的尺寸会明显小于所有图片拼合前的大小。单张的 GIF 只有相关的一个色表，而单独分割的每一张 GIF 都有自己的一个色表，这就增加了总体的大小。因此，单独的一张 JPEG 或者 PNG sprite 在大小上非常可能比把一张图分成多张得来的图片总尺寸小。
+- 在不影响画质的情况下，使用合理的图片格式和压缩图片，优先使用 JPG 格式，如果能用 css3 实现动画，则尽量不使用 GIF。如果能使用 canvas 或 SVG 实现，则尽量不使用图片
+- 减少 css 嵌套，最好不要嵌套三层以上。不要在 ID 选择器前面进行嵌套，ID 本来就是唯一的而且权限值大，嵌套完全是浪费性能。
+- 建立公共样式类，把相同样式提取出来作为公共类使用。
+- 避免使用@import，外部的 css 文件中使用@import 会使得页面在加载时增加额外的延迟。
+- 动画有效开启硬件加速
+
+### 7.4.1 动画相关
+
+- 精简 DOM，合理布局
+- 使用 transform 代替 left、top 减少使用引起页面重排的属性
+- 开启硬件加速
+- 尽量避免浏览器创建不必要的图形层
+- 尽量减少 js 动画，如需要，使用对性能友好的 requestAnimationFrame
+
+<br/>
+
+## 7.5 transform 和 opacity
+
+transform 在动画过程中也不需要改变缓存的记录，而在图层合成时遍历当前层的点然后用上述公式来计算出对应的新坐标点就可以了，它也可以视作一种与图层内容无关的变换，齐次矩阵
+
+https://www.cnblogs.com/dashnowords/p/11741892.html
+
+<br/>
+
+## 7.6 Vue 相关
+
+- 在 vue2.0 中不在 data 上使用嵌套多层的对象，或使用 Object.freeze 冻结对象。vue3 中使用了 lazy reactive 不用担心这个。
+- 异步加载路由，减少体积
+- 通过使用 require.context。自动生成路由
+
+```javascript
+// ../components/test目录下的vue文件
+let _req = require.context('../components/test', true, /\.vue$/);
+let routes = [];
+
+_req.keys().map((name) => {
+  const nameArr = name.split('.');
+  // 模块的export.defalut
+  const comp = _req(name).default;
+  routes.push({
+    path: `/test${nameArr[1]}`,
+    component: comp,
+    title: comp.name
+  });
+});
+
+export default routes;
+```
+
+- 通过$store.registerModule 动态注册状态树，减小打包体积。（混入 beforeCreate，异步加载 store 的模块）
+
+```javascript
+Vue.mixin({
+  beforeCreate: function () {
+    if (this.$options[config.dynamicVuex]) {
+      let name = config.moduleName || this.$options.name;
+      console.log('name = ', name);
+      import(`./store/module/${name}.store.js`).then((module) => {
+        // or require.ensure
+        this.$store.registerModule(name, module.default);
+      });
+    }
+  }
+});
+```
+
+<br/>
+
+## 7.7 React 相关
+
+- 更合理的传递 state 和 props:
+  - 在构造函数里使用 bind;
+  - 尽量不使用内联的对象;
+  - 不传递不必要的属性
+- 合理使用 shouldComponentUpdate 生命钩子和继承 PureComponent 组件
+
+<br/>
+
+## 7.8 Tree-Shaking
+
+Tree-shaking 的本质是消除无用的 js 代码在 webpack 项目中，有一个入口文件，相当于一棵树的主干，入口文件有很多依赖的模块，相当于树枝。实际情况中，虽然依赖了某个模块，但其实只使用其中的某些功能。通过 Tree-Shaking，将没有使用的模块摇掉，这样来达到删除无用代码的目的。但对于模块内部的无用代码，不能使用 tree-shaking。类和对象内部都不会再被分别处理。
+
+webpack 负责对代码进行标记，把 import & export 标记为 3 类：
+
+1、所有 import 标记为 /_ harmony import _/
+
+2、被使用过的 export 标记为 /_ harmony export ([type]) _/，其中 [type] 和 webpack 内部有关，可能是 binding, immutable 等等。
+
+3、没被使用过的 import 标记为 /_ unused harmony export [FuncName] _/，其中 [FuncName] 为 export 的方法名称
+
+之后在 Uglifyjs (或者其他类似的工具) 步骤进行代码精简，把没用的都删除。
+
+ES6 module 特点：
+
+- 只能作为模块顶层的语句出现
+- import 的模块名只能是字符串常量
+- import binding 是 immutable 的
+
+ES6 模块依赖关系是确定的，和运行时的状态无关，可以进行可靠的静态分析，这就是 tree-shaking 的基础。 package.json 新增了一个配置项叫做 sideEffects。
 
 <br/>
 <br/>
